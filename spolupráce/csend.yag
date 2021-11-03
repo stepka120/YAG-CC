@@ -1,6 +1,7 @@
 {{/*
  	Trigger: ^-csend(-noping)?
 	Trigger Type: regex
+	omezit na pouze moderační + partnershipové role
 */}}
 
 {{$spolupráce_schválené_kanál_ID := 887943837836783656}}
