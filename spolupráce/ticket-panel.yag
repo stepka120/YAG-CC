@@ -1,3 +1,8 @@
+{{/*
+ 	Trigger added reaction
+	Trigger Type: reaction
+*/}}
+
 {{$spolupráce_žádost_ID := 874948110542045214}}
 {{$spolupráce_posuzovaná_ID := 874948239978299393}}
 {{$spolupráce_žádost_kanál_ID := 874949678066696202}}
