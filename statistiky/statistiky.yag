@@ -1,0 +1,33 @@
+{{/*
+ 	interval: 5 minutes
+	Trigger Type: minute interval
+*/}}
+
+{{$cíl_ID := 823290492891693097}}
+{{$všichni_členové_ID := 880533018048090182}}
+{{$členové_ID := 880533373855092746}}
+{{$online_lidé_ID := 880533513009496104}}
+{{$roboti_ID := 880533608618684427}}
+ 
+{{$cíl_inkrement := 100}}
+ 
+{{$všichni_členové_počet := .Guild.MemberCount}}
+{{$roboti_počet :=  (reFind "[0-9]{1,5}" (getChannel $roboti_ID).Name)}}
+{{$členové_počet := (sub $všichni_členové_počet $roboti_počet)}}
+{{$online_lidé_počet := (sub onlineCount $roboti_počet)}}
+{{$cíl_počet := mult (add  (div $všichni_členové_počet $cíl_inkrement) 1 ) $cíl_inkrement}}
+ 
+{{$cíl_jméno := (getChannel $cíl_ID).Name}}
+{{$všichni_členové_jméno := (getChannel $všichni_členové_ID).Name}}
+{{$členové_jméno := (getChannel $členové_ID).Name}}
+{{$online_lidé_jméno := (getChannel $online_lidé_ID).Name}}
+ 
+{{$cíl_jméno_nové := (reReplace "[0-9]{1,5}" $cíl_jméno (toString $cíl_počet))}}
+{{$všichni_členové_jméno_nové := (reReplace "[0-9]{1,5}" $všichni_členové_jméno (toString $všichni_členové_počet))}}
+{{$členové_jméno_nové := (reReplace "[0-9]{1,5}" $členové_jméno (toString $členové_počet))}}
+{{$online_lidé_jméno_nové := (reReplace "[0-9]{1,5}" $online_lidé_jméno (toString $online_lidé_počet))}}
+ 
+{{editChannelName $cíl_ID $cíl_jméno_nové}}
+{{editChannelName $všichni_členové_ID $všichni_členové_jméno_nové}}
+{{editChannelName $členové_ID $členové_jméno_nové}}
+{{editChannelName $online_lidé_ID $online_lidé_jméno_nové}}
