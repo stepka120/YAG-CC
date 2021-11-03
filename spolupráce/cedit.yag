@@ -1,0 +1,26 @@
+{{/*
+ 	Trigger: cedit
+	Trigger Type: command
+	omezit na pouze moderační + partnershipové role
+*/}}
+
+{{$spolupráce_rozhodované_kanál_ID := 874950407657508895}}
+ 
+{{$args := parseArgs 2 "použití: -cedit [msgID] [nová zpráva (vč. zmínky žadatele)]"
+    (carg "int" "msgID")
+    (carg "string" "nový text")}}
+{{$číslo := $args.Get 0}} {{/* <- will have the first arg */}}
+{{$text := $args.Get 1}} {{/* <- will have the second arg */}}
+ 
+{{$mentioned_id := "No user"}}
+{{with .Message.Mentions}}
+{{$mentioned_id = (index . (sub (len .) 1)).ID}}
+{{end}}
+ 
+{{if eq (toString $mentioned_id) "No user"}}
+Chyba: Chybí autor spolupráce
+{{else}}
+{{editMessage $spolupráce_rozhodované_kanál_ID $číslo $text}}
+{{addReactions "✅"}}
+Úprava úspěšná.
+{{end}}
