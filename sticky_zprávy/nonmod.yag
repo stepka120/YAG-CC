@@ -1,0 +1,47 @@
+{{/*
+	seznam všech nemoderátorských příkazů
+ 
+	Trigger .*
+	Trigger Type: Regex
+ 
+	Usage:
+	Just type :)
+ 
+	Copyright (c): Black Wolf, 2021
+	License: MIT
+	Repository: https://github.com/BlackWolfWoof/yagpdb-cc/
+*/}}
+ 
+{{$message := cembed `description` (joinStr `` `**Seznam příkazů:**` "\n"
+`?iq` "\n"
+`?laska` "\n"
+`?otazka [dotaz]` "\n"
+`?sance [dotaz]` "\n"
+`?prikazy` "\n"
+"\n"
+`**A dále máme zkratky na řetězce 4 emoji:**` "\n"
+`*h (<:peepoHeart:813683372760104990>)` "\n"
+`*k (<:KEKWtest:805466129497587752>)` "\n"
+`*r  (<:Ree:806954946641133619>)` "\n"
+`*p (<:Pog:805466129257463808>)` "\n"
+"\n"
+`**Statistiky počítání:**` "\n"
+`Kolikrát někdo počítal:` "\n"
+`*?count [volitelně @uživatel]*` "\n"
+`Leaderboard počítání:` "\n"
+`*?topcount*` "\n"
+"\n"
+`**Návrhy:**` "\n"
+`-suggest [návrh]` `=> předloží návrh` "\n"
+`-deletesuggestion [ID návrhu]` `=> smaže (vlastní) návrh` "\n"
+`-editsuggestion [ID návrhu] [Nový návrh]` `=> upraví (vlastní) návrh na [Nový návrh]` "\n"
+"\n"
+`**A pokud se cítíte štědře, bumpněte prosím náš server.** <:peepoHeart:813683372760104990>` "\n"
+`!d bump` "\n"
+)}}
+{{/* do not edit below */}}
+{{if $db := dbGet .Channel.ID "stickymessage"}}
+	{{deleteMessage nil (toInt $db.Value) 0}}
+{{end}}
+{{$id := sendMessageRetID nil $message}}
+{{dbSet .Channel.ID "stickymessage" (str $id)}}
