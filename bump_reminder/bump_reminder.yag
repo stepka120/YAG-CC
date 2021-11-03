@@ -1,0 +1,27 @@
+{{/*
+ 	Trigger: !d bump
+	Trigger Type: exact
+	přípomínka bumpu na Disboardu
+*/}}
+
+{{$příkazy_robot_kanál_ID := 808618111917883404}}
+{{$Bump_reminder := " "}}
+{{if (dbGet 204255221017214977 "Bump_reminder")}}
+	{{$Bump_reminder = joinStr "" "<@" (dbGet 204255221017214977 "Bump_reminder").Value ">"}}
+{{end}}
+ 
+{{if .ExecData}}
+	{{$embed := cembed  `title` `🔔 **Čas na Bump**`
+	`description` `Bumpni náš server s pomocí !d bump` 
+	`color` 9442302}}
+	{{$pingy := joinStr " " $Bump_reminder .User.Mention}}
+	{{$zpráva :=complexMessage "content" $pingy "embed" $embed}}
+	{{sendMessage $příkazy_robot_kanál_ID $zpráva}}
+{{else if not (dbGet 204255221017214977 "Bump")}}
+	{{sendMessage $příkazy_robot_kanál_ID (joinStr "" "Děkujeme za Bump serveru, za 2 hodiny se připomeneme zase. <:peepoHeart:813683372760104990>" "\n" .User.Mention)}}
+	{{dbSetExpire 204255221017214977 "Bump" (str .User.ID) 7205}}
+	{{scheduleUniqueCC .CCID nil 7200 .User .User.ID}}
+{{else}}
+	{{sendMessage $příkazy_robot_kanál_ID (joinStr "" "Je nám líto, ale !d bump, už v minulých 2 hodinách někdo použil. <:peepoHeart:813683372760104990>" "\n" .User.Mention)}}
+	{{dbSetExpire 204255221017214977 "Bump_reminder" (str .User.ID) 7205}}
+{{end}}
