@@ -1,0 +1,14 @@
+{{/*
+ 	Trigger: setcount
+	Trigger Type: command
+	omezit na pouze moderátorské role
+*/}}
+
+{{$args := parseArgs 2 "použití: -setcount [nová hodnota]"
+    (carg "int" "msgID")}}
+{{$číslo := $args.Get 0}} {{/* <- will have the first arg */}}
+ 
+ 
+ 
+{{dbSet 2000 "counting_counter" $číslo}}
+úspěšně nastaveno aktuální hodnotu počítání na {{$číslo}}
