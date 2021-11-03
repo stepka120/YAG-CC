@@ -1,0 +1,1 @@
+systém spoluprácí
