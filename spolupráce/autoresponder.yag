@@ -1,0 +1,20 @@
+{{/*
+ 	Trigger: spolupr(a|á)c(e|(i|í)|u)
+	Trigger Type: regex
+	reaguje pouze v kanálech s názvem obsahujícím "ticket-"
+*/}}
+
+{{$ticket_panel_kanál_ID := 816305213728227378}}
+{{$zmínka := (getChannel $ticket_panel_kanál_ID).Mention}}
+ 
+{{if eq (reFind "ticket-" .Channel.Name) "ticket-"}}
+ 
+{{$embed := cembed `description` (joinStr `` `**Návod k automatizovanému systému spoluprácí na HFS**` "\n"
+`Děkujeme za zájem o spolupráci.` "\n"
+ `Byli bychom ovšem raději, kdyby byly žádosti o spolupráce směřovány přes náš automatický systém spoluprací, začínající v ` $zmínka ` na ticket panelu reakcí 📧` "\n"
+`Po přidání příslušné reakce bude odeslán návod do PM, proto je musíte mít povolené.` "\n"
+`Případné dotazy k systému můžete směřovat sem, nicméně bude po odeslání žádosti vytvořen (další) ticket.` "\n")}}
+{{$zpráva :=complexMessage "content" .User.Mention "embed" $embed}}
+{{sendMessage nil $zpráva}}
+ 
+{{end}}
