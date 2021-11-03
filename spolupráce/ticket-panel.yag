@@ -1,6 +1,7 @@
 {{/*
  	Trigger added reaction
 	Trigger Type: reaction
+	omezit na kanál s ticket panelem
 */}}
 
 {{$spolupráce_žádost_ID := 874948110542045214}}
