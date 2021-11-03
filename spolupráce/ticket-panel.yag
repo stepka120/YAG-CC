@@ -1,0 +1,20 @@
+{{$spolupráce_žádost_ID := 874948110542045214}}
+{{$spolupráce_posuzovaná_ID := 874948239978299393}}
+{{$spolupráce_žádost_kanál_ID := 874949678066696202}}
+ 
+ 
+{{if eq .Reaction.Emoji.Name "📧"}}
+{{deleteMessageReaction nil .Reaction.MessageID .User.ID "📧"}}
+{{addRoleID $spolupráce_žádost_ID}}
+{{removeRoleID $spolupráce_posuzovaná_ID}}
+{{removeRoleID $spolupráce_žádost_ID 86400}}
+{{$zmínka := (getChannel $spolupráce_žádost_kanál_ID).Mention}}
+{{$embed := cembed `description` (joinStr `` `**Návod k automatizovanému systému spoluprácí na HFS**` "\n"
+`Děkujeme za zájem o spolupráci.` "\n"
+ `Pro pokračování odešlete příkaz ***-send [popis serveru] [pozvánka serveru]*** do kanálu: ` $zmínka "\n"
+`Pozvánka by měla být ve finálním stavu, ovšem bez zmínek (a bez hranatých závorek).` "\n"
+`Jakmile příkaz odešlete, automaticky se otevře ticket.` "\n"
+`Pokud máte zájem o více než jednu spolupráci, počkejte s odesláním další, dokud nebude o předchozí rozhodnuto.` "\n"
+`**Na odeslání máte 24 hodin, poté musíte znovu stejnou cestou zažádat.**`)}}
+{{sendDM $embed}}
+{{end}}
