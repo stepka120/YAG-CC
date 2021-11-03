@@ -1,0 +1,30 @@
+{{/*
+ 	Trigger: ^-csend(-noping)?
+	Trigger Type: regex
+*/}}
+
+{{$spolupráce_schválené_kanál_ID := 887943837836783656}}
+{{$spolupráce_kanál_ID := 804697135814803476}}
+{{$spolupráce_role_ID := 806104804022812702}}
+{{$ping_spolupráce_role_ID := 824328267934203905}}
+{{$instrukce := "Spolupráce byla hlasováním schválena, více informací a náš partnership text naleznete v ticketu."}}
+ 
+{{$args := parseArgs 2 "použití: -csend [msgID]"
+    (carg "int" "msgID")}}
+{{$msgID := $args.Get 0}} {{/* <- will have the first arg */}}
+ 
+{{$mentioned_id := "No user"}}
+{{with (getMessage $spolupráce_schválené_kanál_ID $msgID).Mentions}}
+{{$mentioned_id = (index . (sub (len .) 1)).ID}}
+{{end}}
+ 
+{{$ping_spolupráce := (getRole $ping_spolupráce_role_ID).Mention}}
+{{if eq (index .Args 0) "-csend-noping"}}
+	{{$ping_spolupráce = " "}}
+{{end}}
+ 
+{{giveRoleID $mentioned_id $spolupráce_role_ID}}
+{{$msg := (getMessage $spolupráce_schválené_kanál_ID $msgID).Content}}
+{{$msgN := (reReplace $instrukce $msg $ping_spolupráce)}}
+ 
+{{sendMessageNoEscape $spolupráce_kanál_ID $msgN}}
