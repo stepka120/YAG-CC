@@ -3,7 +3,7 @@
 	Trigger Type: regex
 	omezit na kanál spolupráce-žádpst
 */}}
-
+ 
 {{$spolupráce_žádost_kanál_ID := 874949678066696202}}
 {{$posuzovací_kanál_ID := 874950407657508895}}
 {{$spolupráce_žádost_ID := 874948110542045214}}
@@ -48,14 +48,22 @@
 	{{deleteMessage nil $x 60}}
 	{{sendDM $embed_long}}
 {{else if eq $Cmd "-send"}}	
-	{{$text := reReplace "-send" .Message.Content " "}}
-	{{$zpráva := (joinStr " " $text .User.Mention)}}
-	{{deleteTrigger 0}}
-	{{removeRoleID $spolupráce_žádost_ID}}
-	{{addRoleID $spolupráce_posuzovaná_ID}}
-	{{$x := sendMessageRetID $posuzovací_kanál_ID $zpráva}}
-	{{addMessageReactions $posuzovací_kanál_ID $x "👍" "👎"}}
-	{{$silent := (createTicket .User (joinStr " " "spolupráce" .User)) }}
+	{{if eq (reFind "gg/" .Cmd) "gg/"}}
+		{{$text := reReplace "-send" .Message.Content " "}}
+		{{$zpráva := (joinStr " " $text .User.Mention)}}
+		{{deleteTrigger 0}}
+		{{removeRoleID $spolupráce_žádost_ID}}
+		{{addRoleID $spolupráce_posuzovaná_ID}}
+		{{$x := sendMessageRetID $posuzovací_kanál_ID $zpráva}}
+		{{addMessageReactions $posuzovací_kanál_ID $x "👍" "👎"}}
+		{{$silent := (createTicket .User (joinStr " " "spolupráce" .User)) }}
+	{{else}}
+		{{$chyba := (joinStr " " "Chyba: nemá pozvánku" .User.Mention)}}
+		{{$zpráva :=complexMessage "content" $chyba "embed" $embed_short}}
+		{{$x :=sendMessageRetID nil $zpráva}}
+		{{deleteTrigger 0}}
+		{{deleteMessage nil $x 60}}
+	{{end}}
 {{else}}
 	{{deleteTrigger 0}}
 	{{$chyba := joinStr " " .User.Mention "**Nesprávné použití: příkaz nerozpoznán**"}}
