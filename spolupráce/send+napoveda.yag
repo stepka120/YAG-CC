@@ -48,7 +48,7 @@
 	{{deleteMessage nil $x 60}}
 	{{sendDM $embed_long}}
 {{else if eq $Cmd "-send"}}	
-	{{if eq (reFind "gg/" .Cmd) "gg/"}}
+	{{if or (eq (reFind "gg/" .Cmd) "gg/") (eq (reFind "com/" .Cmd) "com/")}}
 		{{$text := reReplace "-send" .Message.Content " "}}
 		{{$zpráva := (joinStr " " $text .User.Mention)}}
 		{{deleteTrigger 0}}
