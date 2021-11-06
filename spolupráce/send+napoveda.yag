@@ -1,7 +1,7 @@
 {{/*
  	Trigger: .*
 	Trigger Type: regex
-	omezit na kanál spolupráce-žádpst
+	omezit na kanál spolupráce-žádost
 */}}
  
 {{$spolupráce_žádost_kanál_ID := 874949678066696202}}
