@@ -1,0 +1,19 @@
+{{/*
+	Trigger: .*
+	Trigger Type: Regex
+  vyžadovat roli $newcommer_role_ID
+  spustit přes {{scheduleUniqueCC DELAY nil 5 .User.ID .User.ID} z server join MSG, kde DELAY je čas v sekundách do vyhazovu nových členů
+  autorole musí být oddělatelná a nastavená na $newcommer_role_ID
+  --vyhodí každého člena po DELAY, pokud neposlal na server zprávu
+*/}}
+
+
+{{$newcommer_role_ID := 821354832878764064}}
+
+{{if .ExecData}}
+	{{if (hasRoleID $newcommer_role_ID)}}
+		{{execAdmin "kick" .User.ID "Automod: Neprojevena aktivita na serveru"}}
+	{{end}}
+{{else}}
+	{{removeRoleID $newcommer_role_ID}}
+{{end}}
