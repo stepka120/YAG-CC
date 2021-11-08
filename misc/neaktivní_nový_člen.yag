@@ -9,11 +9,22 @@
 
 
 {{$newcommer_role_ID := 821354832878764064}}
+{{$ignor_kanály_ID := (cslice 809082055907475479 819489536841089044)}}
+
+{{$ignor := false}}
+{{$channel := .Channel.ID}}
+{{range $kanál := $ignor_kanály_ID}}
+	{{if eq $channel $kanál}}
+		{{$ignor = true}}
+	{{end}}
+{{end}}
 
 {{if .ExecData}}
 	{{if (hasRoleID $newcommer_role_ID)}}
 		{{execAdmin "kick" .User.ID "Automod: Neprojevena aktivita na serveru"}}
 	{{end}}
 {{else}}
-	{{removeRoleID $newcommer_role_ID}}
+	{{if not $ignor}}
+		{{removeRoleID $newcommer_role_ID}}
+	{{end}}
 {{end}}
