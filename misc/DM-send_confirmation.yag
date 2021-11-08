@@ -1,0 +1,9 @@
+{{define "dm"}}{{.TemplateArgs.Set "Return" (sendMessageRetID nil (.TemplateArgs.Get "dm"))}}{{end}}{{$t91 := sdict}}
+{{$t91 := sdict}}
+{{$t91.Set "dm" "hello"}}
+{{$t98 := sendTemplateDM "dm" $t91}}
+{{if $t91.Return}}
+dm worked
+{{else}}
+dm failed
+{{end}}
