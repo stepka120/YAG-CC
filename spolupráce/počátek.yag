@@ -8,7 +8,7 @@
 {{$spolupráce_žádost_kanál_ID := 874949678066696202}}
  
 {{$hmm := false}}
-{{$embed := ""}} 
+{{$embed := cembed "description" ""}} 
  
 {{if eq .Reaction.Emoji.Name "📧"}}
 {{deleteMessageReaction nil .Reaction.MessageID .User.ID "📧"}}
