@@ -3,13 +3,13 @@
 	Trigger: .*
 	náhrada nesprávně odeslaných emoji ve zprávách
 */}}
- 
+
 {{$emoji := sdict "forsenCoomer" "<a:forsenCoomer:865667783135592478>" "forsenPls" "<a:forsenPls:865667754055696404>" "peepoComfy" "<a:peepoComfy:855845548182339585>" "PandaAhoj" "<a:PandaAhoj:854783272142503997>" "ZabickaAhooj" "<a:ZabickaAhooj:854783143546585098>" "bozemujcotosakraaa" "<a:bozemujcotosakraaa:854773060812668948>" "FeelsSrdickoBlikBlikMan" "<a:FeelsSrdickoBlikBlikMan:854772609619460107>" "PepeShiba" "<a:PepeShiba:854772159267471370>" "ZabickaNesouhlas" "<a:ZabickaNesouhlas:854768623926247434>" "ZabickaSouhlas" "<a:ZabickaSouhlas:854768599944396820>" "peepoArrive" "<a:peepoArrive:854768016197419038>" "peepoLeave" "<a:peepoLeave:854767923063291944>" "PepegaDriving" "<a:PepegaDriving:853530285483098112>" "Hyperblob" "<a:Hyperblob:853529555612205066>" "OMG" "<a:OMG:853529508971544576>" "ddHuh" "<a:ddHuh:853237645564182558>" "blobDance" "<a:blobDance:823814114035630121>" "pressF" "<a:pressF:823814112076496907>" "monkaX" "<a:monkaX:823814111627968512>" "Dance" "<a:Dance:823814111170789396>" "PepeLaugh" "<a:PepeLaugh:820976097897480222>" "POGSLIDE" "<a:POGSLIDE:820976096098779196>" "Clap" "<a:Clap:820976095082971186>" "pepeJAMMER" "<a:pepeJAMMER:820976094982307842>" "pepeD" "<a:pepeD:820976094646763520>" "peepoClap" "<a:peepoClap:820976094496030721>" "peepoRun" "<a:peepoRun:820976094386716693>" "peepoHey" "<a:peepoHey:820974975920898108>" "kockaHey" "<a:kockaHey:917056974867296266>"}} 
- 
+
 {{$zpráva_stará := reSplit ":" .Message.Content -1}}
 {{$odeslat := false}}
 {{$zpráva_nová  := " "}}
- 
+
 {{range $segment := $zpráva_stará}}
 	{{if $emoji.Get $segment}}
 		{{$odeslat = true}}
@@ -21,13 +21,13 @@
 	{{$zpráva_nová = joinStr "" $zpráva_nová $segment}}
 {{end}}
 {{$zpráva_nová = slice $zpráva_nová 0 (len $zpráva_nová|add -1)}}
- 
+
 {{if .Message.Content}}
-	{{if or (eq (index .Args 0) "-emoji") (eq (index .Args 0) "-emoji-react") (reFind "(?i)<a:[a-ž]{1,30}:[0-9]{17,19}>" .Message.Content)}}
+	{{if or (reFind "^-emoji" .Message.Content) (eq (index .Args 0) "-emoji-react") (reFind "(?i)<a:[a-ž]{1,30}:[0-9]{17,19}>" .Message.Content)}}
 		{{$odeslat = false}}
 	{{end}}
 {{end}}
- 
+
 {{if $odeslat}}
 	{{$embed := cembed "description" $zpráva_nová "author" (sdict "name" .User.String "icon_url" (.Message.Author.AvatarURL "1024")) "footer" (sdict  "text" (joinStr "" "ID:" .User.ID))}}
 	{{sendMessage nil $embed}}
