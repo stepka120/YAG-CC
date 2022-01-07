@@ -3,23 +3,19 @@
 {{$gamer_role_ID := 927286953240588298}}
 {{$márole := false}}
 
-{{if .ExecData}}
-	{{range $keyname, $value := $role}}
-		{{if (hasRoleID $value)}}
-			{{$márole = true}}
+{{if and (eq .ReactionMessage.ID $MsgID) ($role.Get .Reaction.Emoji.Name)}}
+	{{if .ReactionAdded}}
+		{{addRoleID ($role.Get .Reaction.Emoji.Name)}}
+		{{addRoleID $gamer_role_ID}}
+	{{else}}
+		{{removeRoleID ($role.Get .Reaction.Emoji.Name)}}
+		{{range $keyname, $value := $role}}
+			{{if and (hasRoleID $value) (ne ($role.Get $.Reaction.Emoji.Name) $value) }}
+				{{$márole = true}}
+			{{end}}
 		{{end}}
-	{{end}}
-	{{if not $márole}}
-		{{removeRoleID $gamer_role_ID}}
-	{{end}}
-{{else}}
-	{{if and (eq .ReactionMessage.ID $MsgID) ($role.Get .Reaction.Emoji.Name)}}
-		{{if .ReactionAdded}}
-			{{addRoleID ($role.Get .Reaction.Emoji.Name)}}
-			{{addRoleID $gamer_role_ID}}
-		{{else}}
-			{{removeRoleID ($role.Get .Reaction.Emoji.Name)}}
-			{{scheduleUniqueCC .CCID nil 10 .User.ID .User.ID}}
+		{{if not $márole}}
+			{{removeRoleID $gamer_role_ID}}
 		{{end}}
 	{{end}}
 {{end}}
