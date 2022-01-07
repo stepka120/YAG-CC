@@ -1,0 +1,25 @@
+{{$MsgID := 929055066395119636}}
+{{$role := sdict "🇦" "919271417365799003" "🇧" "919271427327279145" "🇨" "919271438110826528" "🇩" "919271446214234152" "🇪" "919271450953793606" "🇫" "919272147103416380" "🇬" "919272143483719720" "🇭" "919272314355478619" "🇮" "919272316012220487" "🇯" "919272319761920020" "🇰" "919272656820404344" "🇱" "919272660494585916" "🇲" "919327179681189958" "🇳" "926672171592450048" "🇴" "926874992988262431"}}
+{{$gamer_role_ID := 927286953240588298}}
+{{$márole := false}}
+
+{{if .ExecData}}
+	{{range $keyname, $value := $role}}
+		{{if (hasRoleID $value)}}
+			{{$márole = true}}
+		{{end}}
+	{{end}}
+	{{if not $márole}}
+		{{removeRoleID $gamer_role_ID}}
+	{{end}}
+{{else}}
+	{{if and (eq .ReactionMessage.ID $MsgID) ($role.Get .Reaction.Emoji.Name)}}
+		{{if .ReactionAdded}}
+			{{addRoleID ($role.Get .Reaction.Emoji.Name)}}
+			{{addRoleID $gamer_role_ID}}
+		{{else}}
+			{{removeRoleID ($role.Get .Reaction.Emoji.Name)}}
+			{{scheduleUniqueCC .CCID nil 10 .User.ID .User.ID}}
+		{{end}}
+	{{end}}
+{{end}}
