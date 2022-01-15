@@ -34,9 +34,9 @@
 {{end}}
 
 {{if $odeslat}}
-	{{$embed := cembed "description" $zpráva_nová "author" (sdict "name" .User.String "icon_url" (.Message.Author.AvatarURL "1024")) "footer" (sdict  "text" (joinStr "" "ID:" .User.ID))}}
+	{{$embed := cembed "description" $zpráva_nová "author" (sdict "name" .User.String "icon_url" (.Message.Author.AvatarURL "1024")) "footer" (sdict  "text" (joinStr "" "ID:" .User.ID)) "timestamp" currentTime}}
 	{{sendMessage nil $embed}}
-	{{if not (or .Message.Mentions .Message.MentionRoles .Message.MentionEveryone (ge (len $zpráva_nová) 1900) ) }}
+	{{if not (or .Message.Mentions .Message.MentionRoles .Message.MentionEveryone (ge (len $zpráva_nová) 1900) .Message.Attachments ) }}
 		{{deleteTrigger 0}}
 	{{end}}
 {{end}}
