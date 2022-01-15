@@ -1,0 +1,18 @@
+{{$logy_ID := 811220564181385236}}
+{{$emoji_author := (userArg .User.ID) }}
+{{$msg_link := .Message.Link}}
+{{$akce := "**Emoji Removed**"}}
+
+{{if .ReactionAdded}}
+	{{$akce = "**Emoji Added**"}}
+{{end}}
+
+{{$embed := cembed `title` $akce `description` (joinStr "" "emoji: " .Reaction.Emoji.MessageFormat "\n"
+	"emoji author: "  $emoji_author.String "\n"
+	"on [msg](" $msg_link ") ID: " .Message.ID "\n" 
+	"in: #" .Channel.Name)
+	"color" 5730958
+	"timestamp" currentTime
+	"footer" (sdict  "text" (joinStr "" "(Author ID: " $emoji_author.ID ")" ) )
+	"author" (sdict "name" .User.String "icon_url" (.User.AvatarURL "1024"))}}
+{{sendMessage $logy_ID $embed}}
