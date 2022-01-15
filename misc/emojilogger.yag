@@ -1,3 +1,8 @@
+{{/*
+	Trigger: any reaction
+	Trigger Type: reaction
+*/}}
+
 {{$logy_ID := 811220564181385236}}
 {{$emoji_author := (userArg .User.ID) }}
 {{$msg_link := .Message.Link}}
