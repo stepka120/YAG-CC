@@ -1,0 +1,33 @@
+{{/*
+	Trigger: (^| )(((v)?(d|ď)(a|e|ě|i|í)?k(uj(i|u|em|me)|es|y|a)?)|(th(x|anks))|\*h|<:peepoHeart:|<:pepeLove:|pod(e|ě)kov(a|á)(t|n)(i|í)?)( |\b|\n|,|\.|!|:|\?)
+	Trigger Type: Regex
+  přidá členovi reputaci, když mu někdo poděkuje
+  120s cooldown na příjem reputace
+*/}}
+
+{{$silent_channels := cslice 843188896816955412}}
+{{$output := ""}}
+ 
+{{if .Message.Mentions}}
+	{{range $user := .Message.Mentions}}
+		{{if not (or (dbGet $user.ID "děkujeme") (eq $user.ID 204255221017214977) (eq $user.ID $.User.ID) )}}
+			{{$output = joinStr "\n" $output (execAdmin "giverep" $user "1")}}
+			{{dbSetExpire $user.ID "děkujeme" "děkujeme" 120}}
+		{{else if ne $user.ID $.User.ID}}
+			{{$output = "No tak, umačkat je tím objímáním přece nechceme."}}
+			{{deleteResponse}}
+		{{else}}
+			{{$output = "No tak, sám sobě neděkuj."}}
+			{{deleteResponse}}
+		{{end}}
+	{{end}}
+	{{range $channel := $silent_channels}}
+		{{if eq $.channel.ID $channel}}
+			{{deleteResponse}}
+		{{end}}
+	{{end}}
+{{else}}
+	{{$output = "Děkuješ někomu? Tak je příště zmiň, ať vím, komu to vyřídit. <:peepoBlanket:820976093632659456>"}}
+	{{deleteResponse}}
+{{end}}
+{{$output}}
