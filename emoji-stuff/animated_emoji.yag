@@ -1,0 +1,71 @@
+{{/*
+	Trigger type: Regex
+	Trigger: ^-emoji(-react)?
+*/}}
+
+{{$emojis_list := "<a:forsenCoomer:865667783135592478><a:forsenPls:865667754055696404><a:peepoComfy:855845548182339585><a:PandaAhoj:854783272142503997><a:ZabickaAhooj:854783143546585098><a:bozemujcotosakraaa:854773060812668948><a:FeelsSrdickoBlikBlikMan:854772609619460107><a:PepeShiba:854772159267471370><a:ZabickaNesouhlas:854768623926247434><a:ZabickaSouhlas:854768599944396820><a:peepoArrive:854768016197419038><a:peepoLeave:854767923063291944><a:PepegaDriving:853530285483098112><a:Hyperblob:853529555612205066><a:OMG:853529508971544576><a:ddHuh:853237645564182558><a:blobDance:823814114035630121><a:pressF:823814112076496907><a:monkaX:823814111627968512><a:Dance:823814111170789396><a:PepeLaugh:820976097897480222><a:POGSLIDE:820976096098779196><a:Clap:820976095082971186><a:pepeJAMMER:820976094982307842><a:pepeD:820976094646763520><a:peepoClap:820976094496030721><a:peepoRun:820976094386716693><a:peepoHey:820974975920898108><a:kockaHey:917056974867296266><a:KEKWW:928697145496862805>"}}
+
+{{$extra_emojis_list := "<:peepoHeart:916731194215915550>"}}
+
+{{if  (reFind " " .StrippedMsg)}}
+	{{$emoji_name := (index .Args 1)}}
+	{{$regex1 := joinStr "" "<a" $emoji_name "[0-9]{18}>" }}
+	{{$regex2 := joinStr "" "a" $emoji_name "[0-9]{18}"}}
+
+	{{$regex3 := joinStr "" "<" $emoji_name "[0-9]{18}>" }}
+	{{$regex4 := joinStr ""  $emoji_name "[0-9]{18}"}}
+
+	{{if reFind $regex1 $emojis_list}}
+		{{if eq (index .Args 0) "-emoji"}}
+			{{sendMessage nil (joinStr " " "Emoji od:" .User.Mention)}}
+			{{sendMessage nil (reFind $regex1 $emojis_list)}}
+			{{if not .Message.Mentions}}
+				{{deleteTrigger 0}}
+			{{end}}
+		{{else}}
+			{{if reFind "[0-9]{18}" .StrippedMsg}}
+				{{$MsgID := toInt (index .Args 2)}}
+				{{if (getMessage nil $MsgID)}}
+					{{addMessageReactions nil $MsgID (reFind $regex2 $emojis_list)}}
+					{{if not .Message.Mentions}}
+						{{deleteTrigger 0}}
+					{{end}}
+				{{else}}
+					neplatné ID
+				{{end}}
+			{{else}}
+				ID chybí/je neplatné
+			{{end}}
+		{{end}}
+	{{else if reFind $regex3 $extra_emojis_list}}
+		{{if eq (index .Args 0) "-emoji"}}
+			{{sendMessage nil (joinStr " " "Emoji od:" .User.Mention)}}
+			{{sendMessage nil (reFind $regex3 $extra_emojis_list)}}
+			{{if not .Message.Mentions}}
+				{{deleteTrigger 0}}
+			{{end}}
+		{{else}}
+			{{if reFind "[0-9]{18}" .StrippedMsg}}
+				{{$MsgID := toInt (index .Args 2)}}
+				{{if (getMessage nil $MsgID)}}
+					{{addMessageReactions nil $MsgID (reFind $regex4 $extra_emojis_list)}}
+					{{if not .Message.Mentions}}
+						{{deleteTrigger 0}}
+					{{end}}
+				{{else}}
+					neplatné ID
+				{{end}}
+			{{else}}
+				ID chybí/je neplatné
+			{{end}}
+		{{end}}
+	{{else}}
+takové emoji neexistuje
+všechny podporované emoji jsou:
+{{$emojis_list}}
+	{{end}}
+{{else}}
+Použití: `-emoji :animované_emoji:`, případně `-emoji-react :animované_emoji: MsgID`
+všechny podporované emoji jsou:
+{{$emojis_list}}
+{{end}}
