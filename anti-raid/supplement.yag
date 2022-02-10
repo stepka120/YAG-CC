@@ -1,0 +1,18 @@
+{{/*vypne anti-raid když v časovaném CC*/}}
+
+
+{{$debug := true}}{{$channel := 811220564181385236}}
+{{/*If $debug is set to true it will output a 'Ruleset enabled' and 'Ruleset disabled' into the join leave log channel. By replacing .Channel.ID with another channel ID you can change where that debug message goes*/}}
+ 
+{{$ruleset := "raid"}}
+{{/*Replace placeholder by the name of your automod v2 ruleset. Make sure they are the same or else it will not work!*/}}
+ 
+{{$people := 3}}
+{{$entries := dbCount "join_track"}}
+ 
+{{if and (lt $entries $people) (reFind (print $ruleset ": Enabled") (execAdmin "automod r"))}}
+	{{$msg := execAdmin (print "automod toggle " $ruleset)|print "__**ANTI RAID:**__ "}}
+	{{if $debug}}
+		{{sendMessage $channel $msg}}
+	{{end}}
+{{end}}
