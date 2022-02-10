@@ -1,16 +1,27 @@
 {{/*
- 	Trigger: !d bump
-	Trigger Type: exact
+ 	Trigger: .*
+	Trigger Type: regex
 	přípomínka bumpu na Disboardu
+
+
+	-bump [čas:minuty] přepíše spuštění reminderu na za X minut
 */}}
- 
+
 {{$ping_role := 0}}
 {{$příkazy_robot_kanál_ID := 808618111917883404}}
 {{$Bump_reminder := " "}}
 {{if (dbGet 204255221017214977 "Bump_reminder")}}
 	{{$Bump_reminder = joinStr "" "<@" (dbGet 204255221017214977 "Bump_reminder").Value ">"}}
 {{end}}
- 
+
+{{$config_role_ID := cslice 805110351011774475 870659834662502410}}
+{{$config := false}}
+{{range $role_ID := $config_role_ID}}
+	{{if hasRoleID $role_ID}}
+		{{$config = true}}
+	{{end}}
+{{end}}
+
 {{$extra_pingy := " "}}
 {{if .ExecData}}
 	{{$embed := cembed  `title` `🔔 **Čas na Bump**`
@@ -21,12 +32,26 @@
 	{{end}}
 	{{$pingy := joinStr " " $extra_pingy $Bump_reminder .User.Mention}}
 	{{$zpráva :=complexMessage "content" $pingy "embed" $embed}}
+	{{sleep 3}}
 	{{sendMessageNoEscape $příkazy_robot_kanál_ID $zpráva}}
-{{else if not (dbGet 204255221017214977 "Bump")}}
-	{{sendMessage $příkazy_robot_kanál_ID (joinStr "" "Děkujeme za Bump serveru, za 2 hodiny se připomeneme zase. <:peepoHeart:813683372760104990>" "\n" .User.Mention)}}
+{{else if and (not (dbGet 204255221017214977 "Bump")) (eq (lower (toString .Message.Content)) (toString "!d bump") )}}
+	{{sendMessage $příkazy_robot_kanál_ID (joinStr "" "Děkujeme za Bump serveru, za 2 hodiny se připomeneme zase. <:pepeLove:926794184516595762>" "\n" .User.Mention)}}
 	{{dbSetExpire 204255221017214977 "Bump" (str .User.ID) 7203}}
-	{{scheduleUniqueCC .CCID nil 7200 .User .User.ID}}
-{{else}}
-	{{sendMessage $příkazy_robot_kanál_ID (joinStr "" "Je nám líto, ale !d bump, už v minulých 2 hodinách někdo použil. <:peepoHeart:813683372760104990>" "\n" .User.Mention)}}
+	{{scheduleUniqueCC .CCID nil 7200 "Bump" .User.ID}}
+{{else if (eq (lower (toString .Message.Content)) (toString "!d bump") )}}
+	{{sendMessage $příkazy_robot_kanál_ID (joinStr "" "Je nám líto, ale !d bump, už v minulých 2 hodinách někdo použil. <:pepeLove:926794184516595762>" "\n" .User.Mention)}}
 	{{dbSetExpire 204255221017214977 "Bump_reminder" (str .User.ID) 7205}}
+{{else if and (reFind "(?i)^-bump($| )" .Message.Content) $config }}
+	{{$čas := mult (reFind "-?[0-9]+" .Message.Content) 60}}
+	{{if $čas}}
+		{{if gt $čas 0}}
+			{{dbSetExpire 204255221017214977 "Bump" (str .User.ID) (add $čas 3)}}
+			{{scheduleUniqueCC .CCID nil $čas "Bump" .User.ID}}
+			posun úspěšný
+		{{else}}
+			**Chyba: neplatný časový interval**
+		{{end}}
+	{{else}}
+		**použití: -bump [čas:minuty]**
+	{{end}}
 {{end}}
