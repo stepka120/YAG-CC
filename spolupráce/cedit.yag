@@ -3,8 +3,9 @@
 	Trigger Type: command
 	omezit na pouze moderační + partnershipové role
 */}}
-
+ 
 {{$spolupráce_rozhodované_kanál_ID := 874950407657508895}}
+{{$spolupráce_schválené_kanál_ID := 887943837836783656}}
  
 {{$args := parseArgs 2 "použití: -cedit [msgID] [nová zpráva (vč. zmínky žadatele)]"
     (carg "int" "msgID")
@@ -20,7 +21,15 @@
 {{if eq (toString $mentioned_id) "No user"}}
 Chyba: Chybí autor spolupráce
 {{else}}
-{{editMessage $spolupráce_rozhodované_kanál_ID $číslo $text}}
-{{addReactions "✅"}}
-Úprava úspěšná.
+	{{if (getMessage $spolupráce_rozhodované_kanál_ID $číslo) }}
+		{{editMessage $spolupráce_rozhodované_kanál_ID $číslo $text}}
+		{{addReactions "✅"}}
+		Úprava  v <#{{$spolupráce_rozhodované_kanál_ID}}>úspěšná.
+	{{else if (getMessage $spolupráce_schválené_kanál_ID $číslo)}}
+		{{editMessage $spolupráce_schválené_kanál_ID $číslo $text}}
+		{{addReactions "✅"}}
+		Úprava  v <#{{$spolupráce_schválené_kanál_ID}}>úspěšná.
+	{{else}}
+		Chyba: neplatné ID
+	{{end}}
 {{end}}
