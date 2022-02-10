@@ -1,7 +1,7 @@
 {{/*
  	Trigger: .*
 	Trigger Type: regex
-	omezit na kanál spolupráce-žádost
+	omezit na kanál spolupráce-žáopst
 */}}
  
 {{$spolupráce_žádost_kanál_ID := 874949678066696202}}
@@ -9,12 +9,11 @@
 {{$spolupráce_žádost_ID := 874948110542045214}}
 {{$spolupráce_posuzovaná_ID := 874948239978299393}}
  
-{{$Cmd := index .Args 0}}
 {{$zmínka := (getChannel $spolupráce_žádost_kanál_ID).Mention}}
  
 {{$embed_short := cembed `description` (joinStr `` `**Návod k automatizovanému systému spoluprácí na HFS**` "\n"
 `Děkujeme za zájem o spolupráci.` "\n"
- `Pro pokračování odešlete příkaz ***-send [popis serveru] [pozvánka serveru]*** sem do kanálu: ` "\n"
+ `Pro pokračování odešlete příkaz ***-send [partnership text]*** sem do kanálu: ` "\n"
 `Pozvánka by měla být ve finálním stavu, ovšem bez zmínek (a bez hranatých závorek).` "\n"
 `Jakmile příkaz odešlete, automaticky se otevře ticket.` "\n"
 `Pokud máte zájem o více než jednu spolupráci, počkejte s odesláním další, dokud nebude o předchozí rozhodnuto.` "\n"
@@ -41,21 +40,22 @@
 `Custom Invite • https://dsc.gg/hfs ` "\n"
 `Banner: https://media.discordapp.net/attachments/825390510788313094/828554232608456714/standard_2.gif`)}}
  
-{{if eq $Cmd "-napoveda"}}
+{{$regex := "^-napoveda"}}
+{{if (reFind "^-n(a|á)pov(e|ě)da" .Message.Content) }}
 	{{deleteTrigger 0}}
 	{{$zpráva :=complexMessage "content" .User.Mention "embed" $embed_short}}
 	{{$x :=sendMessageRetID nil $zpráva}}
 	{{deleteMessage nil $x 60}}
 	{{sendDM $embed_long}}
-{{else if eq $Cmd "-send"}}	
-	{{$text := reReplace "-send" .Message.Content " "}}
-	{{$zpráva := (joinStr " " $text .User.Mention)}}
-	{{deleteTrigger 0}}
-	{{removeRoleID $spolupráce_žádost_ID}}
-	{{addRoleID $spolupráce_posuzovaná_ID}}
-	{{$x := sendMessageRetID $posuzovací_kanál_ID $zpráva}}
-	{{addMessageReactions $posuzovací_kanál_ID $x "👍" "👎"}}
-	{{$silent := (createTicket .User (joinStr " " "spolupráce" .User)) }}
+{{else if (reFind "^-send" .Message.Content) }}	
+		{{$text := reReplace "^-send" .Message.Content ""}}
+		{{$zpráva := (joinStr " " $text .User.Mention)}}
+		{{deleteTrigger 0}}
+		{{removeRoleID $spolupráce_žádost_ID}}
+		{{addRoleID $spolupráce_posuzovaná_ID}}
+		{{$x := sendMessageRetID $posuzovací_kanál_ID $zpráva}}
+		{{addMessageReactions $posuzovací_kanál_ID $x "👍" "👎"}}
+		{{$silent := (createTicket .User (joinStr " " "spolupráce" .User)) }}
 {{else}}
 	{{deleteTrigger 0}}
 	{{$chyba := joinStr " " .User.Mention "**Nesprávné použití: příkaz nerozpoznán**"}}
