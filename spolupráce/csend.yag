@@ -28,6 +28,6 @@
 {{$msg := (getMessage $spolupráce_schválené_kanál_ID $msgID).Content}}
 {{$msgS := (reReplace "@everyone" $msg "")}}
 {{$msgSS := (reReplace "@here" $msgS "")}}
-{{$msgN := (reReplace $instrukce $msgSS $ping_spolupráce)}}
+{{$msgN := (reReplace $instrukce $msgN $ping_spolupráce)}}
 
 {{sendMessageNoEscape $spolupráce_kanál_ID $msgSS}}
