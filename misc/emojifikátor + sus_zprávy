@@ -1,0 +1,76 @@
+{{/*upozornění na divné zprávy*/}}
+{{$ignore_kategorie_divné := cslice 765218860159991818}}
+
+{{$emojiregex := "(?i)<(a)?:[a-ž]{1,30}:[0-9]{17,20}>"}}
+{{$charregex := "(?i)[^a-ž0-9\x20-\x7F]"}}
+
+{{$moderujeme := true}}
+{{range $kategorie := $ignore_kategorie_divné}}
+	{{if eq $kategorie $.Channel.ParentID}}
+		{{$moderujeme = false}}
+	{{end}}
+{{end}}
+
+{{$text := .Message.Content}}
+{{if and  $text $moderujeme}}
+	{{$divné := len (reFindAll $emojiregex $text)}}
+	{{range $emoji := (reFindAll $emojiregex $text)}}
+		{{$text = reReplace $emojiregex $text ""}}
+	{{end}}
+	{{$celek := (len $text)|add $divné}}
+	{{$divné = add $divné (len (reFindAll $charregex $text))}}
+	{{$ratio := div (toFloat $divné ) (toFloat $celek )}}
+	{{if and (ge $ratio 0.33) (ge $divné 5)}}
+		<@682293889759313960> zachytilo by s poměrem {{$ratio}} a počtem {{$divné}}
+	{{end}}
+{{end}}
+
+{{/*náhrada nesprávně odeslaných emoji ve zprávách*/}}
+
+
+{{$ignore_emoji := cslice 804697135814803476 874949678066696202 874942892173582357}}
+
+{{$emoji_dynamic := sdict "forsenCoomer" "<a:forsenCoomer:865667783135592478>" "forsenPls" "<a:forsenPls:865667754055696404>" "peepoComfy" "<a:peepoComfy:855845548182339585>" "PandaAhoj" "<a:PandaAhoj:854783272142503997>" "ZabickaAhooj" "<a:ZabickaAhooj:854783143546585098>" "bozemujcotosakraaa" "<a:bozemujcotosakraaa:854773060812668948>" "FeelsSrdickoBlikBlikMan" "<a:FeelsSrdickoBlikBlikMan:854772609619460107>" "PepeShiba" "<a:PepeShiba:854772159267471370>" "ZabickaNesouhlas" "<a:ZabickaNesouhlas:854768623926247434>" "ZabickaSouhlas" "<a:ZabickaSouhlas:854768599944396820>" "peepoArrive" "<a:peepoArrive:854768016197419038>" "peepoLeave" "<a:peepoLeave:854767923063291944>" "PepegaDriving" "<a:PepegaDriving:853530285483098112>" "Hyperblob" "<a:Hyperblob:853529555612205066>" "OMG" "<a:OMG:853529508971544576>" "ddHuh" "<a:ddHuh:853237645564182558>" "blobDance" "<a:blobDance:823814114035630121>" "pressF" "<a:pressF:823814112076496907>" "monkaX" "<a:monkaX:823814111627968512>" "Dance" "<a:Dance:823814111170789396>" "PepeLaugh" "<a:PepeLaugh:820976097897480222>" "POGSLIDE" "<a:POGSLIDE:820976096098779196>" "Clap" "<a:Clap:820976095082971186>" "pepeJAMMER" "<a:pepeJAMMER:820976094982307842>" "pepeD" "<a:pepeD:820976094646763520>" "peepoClap" "<a:peepoClap:820976094496030721>" "peepoRun" "<a:peepoRun:820976094386716693>" "peepoHey" "<a:peepoHey:820974975920898108>" "kockaHey" "<a:kockaHey:917056974867296266>" "KEKWW" "<a:KEKWW:928697145496862805>" "KEKWLaugh" "<a:KEKWLaugh:945716541763252294>"}} 
+
+{{$emoji_static := sdict "Ban" "<:Ban:819520195399778304>" "Catounge" "<:Catongue:819140527613935657>" "FailFish" "<:FailFish:831588270512144454>" "FeelsWowMan" "<:FeelsWowMan:916735370622824448>" "GoodDog" "<:GoodDog:845941132471042058>" "HmmLaugh" "<:HmmLaugh:864919679835570186>" "KEKHands" "<:KEKHands:845225785639698433>" "Kappa" "<:Kappa:806974814107205733>" "Kekw" "<:Kekw:805466129497587752>" "PeepoHey" "<:PeepoHey:823817019543519333>" "PauseChamp" "<:PauseChamp:882295523288182804>" "Omegalul" "<:Omegalul:805466129316708362>" "OmegaSp" "<:OmegaSp:820976093578264636>" "Okayge" "<:Okayge:805466130432393266>" "NotStonks" "<:NotStonks:916398779236753408>" "NotLikeThis" "<:NotLikeThis:805466130416140318>" "Lul" "<:Lul:818385944910364722>" "KekwHyper" "<:KekwHyper:907620914655539281>" "liska" "<:liska:939961952673878077>" "PepeHands" "<:PepeHands:805466129161125972>" "Pepega" "<:Pepega:806956100422860800>" "Pog" "<:Pog:805466129257463808>" "Ree" "<:Ree:806954946641133619>" "Sadge" "<:Sadge:805466129689870376>" "SeriousSloth" "<:SeriousSloth:945715197245521970>" "Stonks" "<:Stonks:916398779303870464>" "ZabickaShrug" "<:ZabickaShrug:845234598110822417>" "noice" "<:noice:871329983426080799>" "monkaChrist" "<:monkaChrist:820912507236778054>" "kocka" "<:kocka:833322039900241931>" "hmmm" "<:hmmm:825767750948880415>" "forsenScoots" "<:forsenScoots:865667728484466688>" "ehh" "<:ehh:825767675220459531>" "dogeSmirk" "<:dogeSmirk:838316082480545823>" "catSad" "<:catSad:819514824580399105>" "ZabickaSmutna" "<:ZabickaSmutna:845234597951438848>" "peepoBlanket" "<:peepoBlanket:820976093632659456>" "peepoHappy" "<:peepoHappy:816215407488663563>" "peepoHeart" "<:peepoHeart:916738574211227809>" "peepo_no" "<:peepo_no:865667279920693258>" "peepo_yes" "<:peepo_yes:865667247530573824>" "pepeLaugh" "<:pepeLaugh:830852899566780427>" "pepeLove" "<:pepeLove:926794184516595762>" "pepeOK" "<:pepeOK:820912507089715231>" "pepegaDrive" "<:pepegaDrive:852902357061861432>" "poggies" "<:poggies:814758570662428703>" "sadKEK" "<:sadKEK:831910041795166243>" "warn" "<:warn:834866904681152532>" "ye" "<:ye:886173383035867146>" "zabickaSmart" "<:zabickaSmart:843407168929529856>"}}
+
+{{$zpráva_stará := reSplit ":" .Message.Content -1}}
+{{$odeslat := false}}
+{{$zpráva_nová  := "  "}}
+
+{{range $segment := $zpráva_stará}}
+	{{if $emoji_dynamic.Get $segment}}
+		{{if ne $.Message.Content $segment}}
+			{{$odeslat = true}}
+		{{end}}
+		{{$segment = ($emoji_dynamic.Get $segment)}}
+		{{$zpráva_nová = slice $zpráva_nová 0 (len $zpráva_nová|add -1)}}
+	{{else if $emoji_static.Get $segment}}
+		{{$segment = ($emoji_static.Get $segment)}}
+		{{$zpráva_nová = slice $zpráva_nová 0 (len $zpráva_nová|add -1)}}
+	{{else}}
+		{{$segment = joinStr "" $segment ":"}}
+	{{end}}
+	{{$zpráva_nová = joinStr "" $zpráva_nová $segment}}
+{{end}}
+{{$zpráva_nová = slice $zpráva_nová 0 (len $zpráva_nová|add -1)}}
+
+{{if .Message.Content}}
+	{{if or (reFind "^-emoji" .Message.Content) (eq (index .Args 0) "-emoji-react") (reFind "(?i)<a:[a-ž]{1,30}:[0-9]{17,19}>" .Message.Content)}}
+		{{$odeslat = false}}
+	{{end}}
+{{end}}
+
+{{range $kanál := $ignore_emoji}}
+	{{if eq $kanál $.Channel.ID}}
+		{{$odeslat = false}}
+	{{end}}
+{{end}}
+
+{{if $odeslat}}
+	{{$embed := cembed "description" $zpráva_nová "author" (sdict "name" .User.String "icon_url" (.Message.Author.AvatarURL "1024")) "footer" (sdict  "text" (joinStr "" "ID:" .User.ID)) "timestamp" currentTime}}
+	{{sendMessage nil $embed}}
+	{{if not (or .Message.Mentions .Message.MentionRoles .Message.MentionEveryone (ge (len $zpráva_nová) 1900) .Message.Attachments ) }}
+		{{deleteTrigger 0}}
+	{{end}}
+{{end}}
