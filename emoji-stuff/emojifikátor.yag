@@ -5,7 +5,12 @@
 */}}
 
 {{$ignore_emoji := cslice 804697135814803476 874949678066696202 874942892173582357}}
- 
+
+{{/*
+	animované emoji budou převzaté automaticky (s nějakým zpožděním)
+	pokud by z nějakého důvodu dané emoji nefungovalo, lze ho ručně definovat do $emojis_list (ruční definice mají prioritu)
+*/}}
+
 {{$emoji_dynamic := sdict "RareSloth" "<a:RareSloth:978374943836360764>"}} 
  
 {{$emoji_static := sdict "KEKL" "<:KEKL:978740313407492096>"}}
