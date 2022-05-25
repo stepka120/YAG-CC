@@ -8,7 +8,7 @@
 
 {{/*
 	animované emoji budou převzaté automaticky (s nějakým zpožděním)
-	pokud by z nějakého důvodu dané emoji nefungovalo, lze ho ručně definovat do $emojis_list (ruční definice mají prioritu)
+	pokud by z nějakého důvodu dané emoji nefungovalo, lze ho ručně definovat do $emoji_dynamic (animované) a $emoji_static (neanimované) (ruční definice mají prioritu)
 */}}
 
 {{$emoji_dynamic := sdict "RareSloth" "<a:RareSloth:978374943836360764>"}} 
