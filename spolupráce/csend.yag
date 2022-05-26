@@ -1,5 +1,8 @@
 {{/*
- 	Trigger: ^-csend(-noping)?
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: ^-csend(-noping)?
 	Trigger Type: regex
 	omezit na pouze moderační + partnershipové role
 */}}
@@ -28,6 +31,6 @@
 {{$msg := (getMessage $spolupráce_schválené_kanál_ID $msgID).Content}}
 {{$msgS := (reReplace "@everyone" $msg "")}}
 {{$msgSS := (reReplace "@here" $msgS "")}}
-{{$msgN := (reReplace $instrukce $msgN $ping_spolupráce)}}
+{{$msgN := (reReplace $instrukce $msgSS $ping_spolupráce)}}
 
-{{sendMessageNoEscape $spolupráce_kanál_ID $msgSS}}
+{{sendMessageNoEscape $spolupráce_kanál_ID $msgN}}
