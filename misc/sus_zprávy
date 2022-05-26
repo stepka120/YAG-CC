@@ -1,8 +1,25 @@
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: .*
+	Trigger Type: regex
+*/}}
+
+{{$ignore_kategorie_divné := cslice 765218860159991818}}
+
 {{$emojiregex := "(?i)<(a)?:[a-ž]{1,30}:[0-9]{17,20}>"}}
 {{$charregex := "(?i)[^a-ž0-9\x20-\x7F]"}}
- 
+
+{{$moderujeme := true}}
+{{range $kategorie := $ignore_kategorie_divné}}
+	{{if eq $kategorie $.Channel.ParentID}}
+		{{$moderujeme = false}}
+	{{end}}
+{{end}}
+
 {{$text := .Message.Content}}
-{{if $text}}
+{{if and  $text $moderujeme}}
 	{{$divné := len (reFindAll $emojiregex $text)}}
 	{{range $emoji := (reFindAll $emojiregex $text)}}
 		{{$text = reReplace $emojiregex $text ""}}
@@ -11,6 +28,6 @@
 	{{$divné = add $divné (len (reFindAll $charregex $text))}}
 	{{$ratio := div (toFloat $divné ) (toFloat $celek )}}
 	{{if and (ge $ratio 0.33) (ge $divné 5)}}
-		<@682293889759313960> zachytilo by s poměrem {{$ratio}} a počtem {{$divné}}
+		{{sendMessage nil (joinStr "" "<@682293889759313960> zachytilo by s poměrem " $ratio " a počtem " $divné) }}
 	{{end}}
 {{end}}
