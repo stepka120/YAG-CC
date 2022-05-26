@@ -1,15 +1,18 @@
 {{/*
- 	Trigger added reaction
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: added reaction
 	Trigger Type: reaction
 */}}
- 
+
+
 {{$spolupráce_žádost_ID := 874948110542045214}}
 {{$spolupráce_posuzovaná_ID := 874948239978299393}}
 {{$spolupráce_žádost_kanál_ID := 874949678066696202}}
- 
-{{$hmm := false}}
+
 {{$embed := cembed "description" ""}} 
- 
+
 {{if eq .Reaction.Emoji.Name "📧"}}
 {{deleteMessageReaction nil .Reaction.MessageID .User.ID "📧"}}
 {{addRoleID $spolupráce_žádost_ID}}
@@ -18,21 +21,10 @@
 {{$zmínka := (getChannel $spolupráce_žádost_kanál_ID).Mention}}
 {{$embed = cembed `description` (joinStr `` `**Návod k automatizovanému systému spoluprácí na HFS**` "\n"
 `Děkujeme za zájem o spolupráci.` "\n"
- `Pro pokračování odešlete příkaz ***-send [popis serveru] [pozvánka serveru]*** do kanálu: ` $zmínka "\n"
-`Pozvánka by měla být ve finálním stavu, ovšem bez zmínek (a bez hranatých závorek).` "\n"
+ `Pro pokračování odešlete příkaz ***-send <partnership text>*** do kanálu: ` $zmínka "\n"
+`Pozvánka by měla být ve finálním stavu, ovšem bez zmínek (a bez špičatých závorek).` "\n"
 `Jakmile příkaz odešlete, automaticky se otevře ticket.` "\n"
 `Pokud máte zájem o více než jednu spolupráci, počkejte s odesláním další, dokud nebude o předchozí rozhodnuto.` "\n"
 `**Na odeslání máte 24 hodin, poté musíte znovu stejnou cestou zažádat.**`)}}
-{{$hmm = true}}
-{{end}}
- 
-{{define "dm"}}{{.TemplateArgs.Set "Return" (sendMessageRetID nil (.TemplateArgs.Get "dm"))}}{{end}}{{$t91 := sdict}}
-{{$t91.Set "dm" $embed}}
-{{if $hmm}}
-{{$t98 := sendTemplateDM "dm" $t91}}
-{{end}}
-{{if (not $t91.Return) and $hmm}}
-{{$complex := complexMessage "content" .User.Mention "embed" $embed}}
-{{$x := sendMessageRetID $spolupráce_žádost_kanál_ID $complex}}
-{{deleteMessage $spolupráce_žádost_kanál_ID $x 60}}
+{{sendDM $embed}}
 {{end}}
