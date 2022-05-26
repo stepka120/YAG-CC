@@ -1,3 +1,11 @@
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: emojilist
+	Trigger Type: Command
+*/}}
+
 {{$animované := ""}}
 {{$statické := ""}}
 {{range $emoji := .Guild.Emojis}}
