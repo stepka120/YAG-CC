@@ -1,8 +1,36 @@
 {{/*
-	Trigger type: Regex
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
 	Trigger: .*
-	náhrada nesprávně odeslaných emoji ve zprávách
+	Trigger Type: regex
 */}}
+
+{{$ignore_kategorie_divné := cslice 765218860159991818}}
+
+{{$emojiregex := "(?i)<(a)?:[a-ž]{1,30}:[0-9]{17,20}>"}}
+{{$charregex := "(?i)[^a-ž0-9\x20-\x7F]"}}
+
+{{$moderujeme := true}}
+{{range $kategorie := $ignore_kategorie_divné}}
+	{{if eq $kategorie $.Channel.ParentID}}
+		{{$moderujeme = false}}
+	{{end}}
+{{end}}
+
+{{$text := .Message.Content}}
+{{if and  $text $moderujeme}}
+	{{$divné := len (reFindAll $emojiregex $text)}}
+	{{range $emoji := (reFindAll $emojiregex $text)}}
+		{{$text = reReplace $emojiregex $text ""}}
+	{{end}}
+	{{$celek := (len $text)|add $divné}}
+	{{$divné = add $divné (len (reFindAll $charregex $text))}}
+	{{$ratio := div (toFloat $divné ) (toFloat $celek )}}
+	{{if and (ge $ratio 0.33) (ge $divné 5)}}
+		{{sendMessage nil (joinStr "" "<@682293889759313960> zachytilo by s poměrem " $ratio " a počtem " $divné) }}
+	{{end}}
+{{end}}
 
 {{$ignore_emoji := cslice 804697135814803476 874949678066696202 874942892173582357}}
 
@@ -12,9 +40,9 @@
 */}}
 
 {{$emoji_dynamic := sdict "RareSloth" "<a:RareSloth:978374943836360764>"}} 
- 
+
 {{$emoji_static := sdict "KEKL" "<:KEKL:978740313407492096>"}}
- 
+
 {{range $emoji := .Guild.Emojis}}
 	{{if and (reFind "^<a:" $emoji.MessageFormat) (not ($emoji_dynamic.Get $emoji.Name))}}
 		{{$emoji_dynamic.Set $emoji.Name $emoji.MessageFormat}}
@@ -22,12 +50,12 @@
 		{{$emoji_static.Set $emoji.Name $emoji.MessageFormat}}
 	{{end}}
 {{end}}
- 
- 
+
+
 {{$zpráva_stará := reSplit ":" .Message.Content -1}}
 {{$odeslat := false}}
 {{$zpráva_nová  := "  "}}
- 
+
 {{range $segment := $zpráva_stará}}
 	{{if $emoji_dynamic.Get $segment}}
 		{{if ne $.Message.Content $segment}}
@@ -44,19 +72,19 @@
 	{{$zpráva_nová = joinStr "" $zpráva_nová $segment}}
 {{end}}
 {{$zpráva_nová = slice $zpráva_nová 0 (len $zpráva_nová|add -1)}}
- 
+
 {{if .Message.Content}}
 	{{if or (reFind "^-emoji(-react)?" .Message.Content) (reFind "(?i)<a:[a-ž]{1,30}:[0-9]{17,19}>" .Message.Content)}}
 		{{$odeslat = false}}
 	{{end}}
 {{end}}
- 
+
 {{range $kanál := $ignore_emoji}}
 	{{if eq $kanál $.Channel.ID}}
 		{{$odeslat = false}}
 	{{end}}
 {{end}}
- 
+
 {{if $odeslat}}
 	{{$embed := cembed "description" $zpráva_nová "author" (sdict "name" .User.String "icon_url" (.Message.Author.AvatarURL "1024")) "footer" (sdict  "text" (joinStr "" "ID:" .User.ID)) "timestamp" currentTime}}
 	{{sendMessage nil $embed}}
