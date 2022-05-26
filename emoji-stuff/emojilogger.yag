@@ -1,5 +1,8 @@
 {{/*
-	Trigger: any reaction
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: added + removed reactions
 	Trigger Type: reaction
 */}}
 
