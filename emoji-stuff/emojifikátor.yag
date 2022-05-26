@@ -6,18 +6,6 @@
 	Trigger Type: regex
 */}}
 
-{{$ignore_kategorie_divné := cslice 765218860159991818}}
-
-{{$emojiregex := "(?i)<(a)?:[a-ž]{1,30}:[0-9]{17,20}>"}}
-{{$charregex := "(?i)[^a-ž0-9\x20-\x7F]"}}
-
-{{$moderujeme := true}}
-{{range $kategorie := $ignore_kategorie_divné}}
-	{{if eq $kategorie $.Channel.ParentID}}
-		{{$moderujeme = false}}
-	{{end}}
-{{end}}
-
 {{$text := .Message.Content}}
 {{if and  $text $moderujeme}}
 	{{$divné := len (reFindAll $emojiregex $text)}}
