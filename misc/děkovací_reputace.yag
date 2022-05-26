@@ -1,13 +1,16 @@
 {{/*
-	Trigger: (^| )(((v)?(d|ď)(a|e|ě|i|í)?k(uj(i|u|em|me)|es|y|a)?)|(th(x|anks))|\*h|<:peepoHeart:|<:pepeLove:|pod(e|ě)kov(a|á)(t|n)(i|í)?)( |\b|\n|,|\.|!|:|\?)
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: (^| )(((v)?(d|ď)(a|e|ě|i|í)?k(uj(i|u|em|eme)|es|y|a)?)|(th(x|anks))|\*h|<:peepoHeart:|<:pepeLove:|pod(e|ě)kov(a|á)(t|n)(i|í)?)( |\b|\n|,|\.|!|:|\?)
 	Trigger Type: Regex
-  přidá členovi reputaci, když mu někdo poděkuje
-  120s cooldown na příjem reputace
+	přidá členovi reputaci, když mu někdo poděkuje
+	120s cooldown na příjem reputace
 */}}
 
-{{$silent_channels := cslice 843188896816955412}}
+{{$silent_channels := cslice 843188896816955412 811209597922443264 804697135814803476}}
 {{$output := ""}}
- 
+
 {{if .Message.Mentions}}
 	{{range $user := .Message.Mentions}}
 		{{if not (or (dbGet $user.ID "děkujeme") (eq $user.ID 204255221017214977) (eq $user.ID $.User.ID) )}}
