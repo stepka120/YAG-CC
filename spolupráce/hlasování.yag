@@ -1,8 +1,12 @@
 {{/*
- 	Trigger added +removed reaction
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: added +removed reaction
 	Trigger Type: reaction
 	omezit na hlasovací kanál spoluprácí
 */}}
+
 
 {{$schválené_kanál_ID := 887943837836783656}}
 {{$zamítnuté_kanál_ID := 874950089314029588}} 
@@ -10,18 +14,18 @@
 {{$spolupráce_schválená_ID := 887951675900448790}}
 {{$spolupráce_zamítnutá_ID := 874948327572119632}}
 {{$instrukce:= "**Spolupráce byla hlasováním schválena, více informací a náš partnership text naleznete v ticketu.**" }}
- 
+
 {{$převaha := 3}}
- 
+
 {{$up := 0}}{{$down := 0}}
 {{range (getMessage nil .ReactionMessage.ID).Reactions}}
-{{if eq .Emoji.Name "👍"}}
+{{if eq .Emoji.MessageFormat "<:peepo_yes:865667247530573824>"}}
 {{$up = .Count}}
-{{else if eq .Emoji.Name "👎"}}
+{{else if eq .Emoji.MessageFormat "<:peepo_no:865667279920693258>"}}
 {{$down = .Count}}
 {{end}}
 {{end}}
- 
+
 {{$mentioned_id := "No user"}}
 {{with .Message.Mentions}}
 {{$mentioned_id = (index . (sub (len .) 1)).ID}}
@@ -30,12 +34,12 @@
 {{if eq (add $down $převaha)  $up}}
 {{$zpráva := (joinStr " " .Message.Content $instrukce)}}
 	{{giveRoleID $mentioned_id $spolupráce_schválená_ID}}
-	{{takeRoleID $mentioned_id $spolupráce_schválená_ID 86400}}
+	{{takeRoleID $mentioned_id $spolupráce_schválená_ID 21600}}
 	{{takeRoleID $mentioned_id $spolupráce_posuzovaná_ID}}
 	{{sendMessage $schválené_kanál_ID $zpráva}}
 	{{deleteAllMessageReactions nil .Reaction.MessageID }}
 	{{addReactions ":white_check_mark:"}}
- 
+
 {{end}}
  
 {{if eq (add $up $převaha)  $down}}
