@@ -1,20 +1,54 @@
 {{/*
- 	Trigger: spolupr(a|á)c(e|(i|í)|u)
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: spolupr(a|á)c(e|(i|í)|u)
 	Trigger Type: regex
 	reaguje pouze v kanálech s názvem obsahujícím "ticket-"
 */}}
 
+
 {{$ticket_panel_kanál_ID := 816305213728227378}}
 {{$zmínka := (getChannel $ticket_panel_kanál_ID).Mention}}
- 
-{{if eq (reFind "ticket-" .Channel.Name) "ticket-"}}
- 
-{{$embed := cembed `description` (joinStr `` `**Návod k automatizovanému systému spoluprácí na HFS**` "\n"
+{{$partnership_manager_roleID := 825388496360702002}}
+{{$žádost_ticket_roleID := 964097769562312734}}
+
+{{$ignore := false}}
+{{$ignore_roles := cslice 874948239978299393 874948327572119632 887951675900448790}}
+{{range $role := $ignore_roles}}
+	{{if hasRoleID $role}}
+		{{$ignore = true}}
+	{{end}}
+{{end}}
+
+
+{{if and (eq (reFind "ticket-" .Channel.Name) "ticket-") (not .ExecData) (not (hasRoleID $žádost_ticket_roleID))}}
+
+{{$embed := cembed `description` (joinStr `` 
+"Chcete-li všem ušetřit čas i práce, použijte prosím náš automatický systém spolupráce." "\n"
+"(začíná **reakcí** 📧 na ticket panelu)" "\n"
+"\n"
+`Pokud to ovšem nepokládáte za možné, budou zde za 15 minut automaticky zmíněni partnership manageři, a pro další postup "tradičním způsobem" budete muset čekat na jejich dostupnost.` "\n")}}
+
+{{/*
+
+starý text:
+
+`**Návod k automatizovanému systému spoluprácí na HFS**` "\n"
 `Děkujeme za zájem o spolupráci.` "\n"
- `Byli bychom ovšem raději, kdyby byly žádosti o spolupráce směřovány přes náš automatický systém spoluprací, začínající v ` $zmínka ` na ticket panelu reakcí 📧` "\n"
+ `Byli bychom ovšem raději, kdyby byly žádosti o spolupráce směřovány přes náš automatický systém spoluprací, začínající v ` $zmínka ` na ticket panelu **reakcí 📧**` "\n"
 `Po přidání příslušné reakce bude odeslán návod do PM, proto je musíte mít povolené.` "\n"
-`Případné dotazy k systému můžete směřovat sem, nicméně bude po odeslání žádosti vytvořen (další) ticket.` "\n")}}
+`Případné dotazy k systému můžete směřovat sem, nicméně bude po odeslání žádosti vytvořen (další) ticket.` "\n"
+*/}}
+
 {{$zpráva :=complexMessage "content" .User.Mention "embed" $embed}}
 {{sendMessage nil $zpráva}}
- 
+{{execCC .CCID nil 900 .User}}
+{{addRoleID $žádost_ticket_roleID}}
+{{removeRoleID $žádost_ticket_roleID 86400}}
+
+
+{{else if and (.ExecData) (not $ignore)}}
+	{{sendMessageNoEscape nil (joinStr "" "<@&" $partnership_manager_roleID ">, máte tu žádost o spolupráci")}}
+
 {{end}}
