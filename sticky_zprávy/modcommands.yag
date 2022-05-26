@@ -43,13 +43,15 @@
 `?lockdown server ` `=> uzamkne **celý** server` "\n"
 `?unlock` `=> odemkne aktuální **kanál**` "\n"
 `?unlock server ` `=> odemkne **celý** server` "\n"
-`-raid` `=> pokud ruleset zapnut: nový člen ihned vyhozen, každý kanál s aktivitou dostane 6h slowmode na 8 hodin` "\n"
+`-raid` `=> pokud ruleset zapnut: nový člen ihned permaban + permamute, pokud kdokoliv odešle zprávu, dostane mute na hodinu` "\n"
 `stejným příkazem se vypíná` "\n"
 "\n"
 `**Spolupráce:**` "\n"
+"-send [partnership text] [zmínka žadatele]" "=> pokud je žadatel neschopný žádat automatikou, můžete takto spolupráci zadat do systému, funguje (skoro) všude mimo <#874949678066696202>" "\n"
 `-cedit [ID zprávy z <#874950407657508895>] [nová zpráva (vč. zmínky žadatele)]` `=> upraví posuzovanou spolupráci na [nová zpráva (vč. zmínky žadatele)]` "\n"
 `**zmínku žadatele dávejte na konec**` "\n"
 `-csend [msgID z <#887943837836783656>]` `=> odešle zprávu z <#887943837836783656> do <#804697135814803476> **a nahradí instrukce pingem spoluprácí**` "\n"
+`-csend-noping [msgID z <#887943837836783656>]` `=> odešle zprávu z <#887943837836783656> do <#804697135814803476> **bez pingu <@&824328267934203905>**` "\n"
 "\n"
 `**Moderace návrhů:**` "\n"
 `-sa deny [ID zprávy v <#882251589107195934>] [důvod]` `=> zamítne posuzovaný návrh` "\n"
@@ -57,6 +59,6 @@
 `-sa approve [ID zprávy v <#882251589107195934>] [komentář]` `=> schválí posuzovaný návrh` "\n"
 `-sa implement [ID zprávy v <#882291833315680296>] [komentář]` `=> označí posuzovaný návrh jako implementovaný` "\n"
 `-sa comment [ID zprávy v <#882251589107195934>] [komentář]` `=> přidá komentář (přepíše starý) posuzovaného návrhu` "\n"
- 
+
 )}}
 {{sendMessage nil $embed}}
