@@ -1,28 +1,51 @@
 {{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: mrole
+	Trigger Type: command
  	na triggeru nezáleží, ale nesmí se spouštět omylem
-  spusí se z welcomeMSG přes execCC
+	spustí se z welcomeMSG přes execCC
 */}}
 
-{{$trigger_roles := (cslice 765220529292181534 765220475156168774 765220667758608424 765220697924042762 765220732820520971 765221034034855977 765221069354827866 765220767008030760 765220831671615548 765220865608515604 765220913880367135 766328383336087592 801852988397977622 765221175424057355 765221222485065789 811306095900491816 765221250859401238 765225953906786314 765221283495280650 765221315317596171 765221370920828978 853643890212601866 765221398313566258 797370767112667156 810057003815796736 767694518858285076 767694600570667009 767694670200307712 824327999989612575 824328135847444490 824328197578555393 824328267934203905 883018227079331880)}}
- 
+{{$student_role_ID := 765221442760605706}}
+{{$logy_kanál_ID := 811220564181385236}}
+
+{{$trigger_roles := (cslice 765220529292181534 765220475156168774 765220667758608424 765220697924042762 765220732820520971 765221034034855977 765221069354827866 765220767008030760 765220831671615548 765220865608515604 765220913880367135 766328383336087592 801852988397977622 765221175424057355 765221222485065789 811306095900491816 765221250859401238 765225953906786314 765221283495280650 765221315317596171 765221370920828978 853643890212601866 765221398313566258 797370767112667156 810057003815796736 767694518858285076 767694600570667009 767694670200307712 824327999989612575 824328135847444490 824328197578555393 824328267934203905 883018227079331880 916024713409597461)}}
+
 {{$předmětové_role_kanál_ID := 805111733982199818}}
 {{$pingovací_role_kanál_ID := 824326069745090660}}
 {{$chat_kanál_ID := 808618931757252609}}
- 
+
+{{if not .ExecData}}
+	{{$chat_kanál_ID = .Channel.ID}}
+{{end}}
 {{$připomínka := (joinStr " " "\n" "A nezapomeň si v" (getChannel $předmětové_role_kanál_ID).Mention "zvolit předměty, které tě baví," "\n"
 "případně si v" (getChannel $pingovací_role_kanál_ID).Mention "nastavit upozornění.")}}
- 
+
 {{$má_role := false}}
 {{range $role := $trigger_roles}}
 	{{if (hasRoleID $role)}}
 		{{$připomínka = " "}}
 	{{end}}
 {{end}}
- 
+
+{{$jméno := ""}}
+
+{{if eq (reFind "nenapsatelné jméno" .Member.Nick) "nenapsatelné jméno"}}
+{{$jméno = (joinStr "" "Automaticky ti byla přidělena přezdívka, protože tvé znaky v nicku běžný člověk nenapíše... 😅" "\n"
+"Proto si, prosím, změň přezdívku tak, aby šla normálně napsat" "\n")}}
+{{end}}
+
 {{$Vítač := (joinStr " " .User.Mention "<a:peepoHey:820974975920898108> Vítej u nás na HFS, doufáme, že se ti tu bude líbit." "\n"
-"Pokud máš nějaké dotazy ohledně učiva, obrať se do našich předmětových poraden, a nezapomeň tam pingnout příslušnou roli." "\n"
+$jméno
+"Pokud máš nějaké dotazy ohledně učiva, obrať se do našich předmětových poraden, **a nezapomeň tam pingnout příslušnou roli**." "\n"
 "Pro vše ostatní tu máme náš skvělý chat, případně minihry." $připomínka)}}
- 
-{{if (getMember .User.ID)}}
+
+{{if and (getMember .User.ID) (not .User.Bot)}}
 	{{sendMessage $chat_kanál_ID $Vítač}}
+	{{if not (hasRoleID $student_role_ID)}}
+		{{giveRoleID .User.ID $student_role_ID}}
+		{{sendMessage $logy_kanál_ID "**Pozor: Selhání autorole**"}}
+	{{end}}
 {{end}}
