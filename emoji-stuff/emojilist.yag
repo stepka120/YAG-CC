@@ -1,0 +1,11 @@
+{{$animované := ""}}
+{{$statické := ""}}
+{{range $emoji := .Guild.Emojis}}
+	{{if (reFind "^<a:" $emoji.MessageFormat)}}
+		{{$animované = joinStr "\n" $animované $emoji.MessageFormat}}
+	{{else}}
+		{{$statické = joinStr "\n" $statické $emoji.MessageFormat}}
+	{{end}}
+{{end}}
+{{sendMessage nil (complexMessage "file" $animované "filename" "animované")}}
+{{sendMessage nil (complexMessage "file" $statické "filename" "statické")}}
