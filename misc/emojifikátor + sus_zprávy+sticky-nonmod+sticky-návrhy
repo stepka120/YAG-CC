@@ -1,0 +1,207 @@
+{{/*upozornění na divné zprávy*/}}
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: .*
+	Trigger Type: regex
+*/}}
+
+{{$ignore_kategorie_divné := cslice 765218860159991818}}
+
+{{$emojiregex := "(?i)<(a)?:[a-ž]{1,30}:[0-9]{17,20}>"}}
+{{$charregex := "(?i)[^a-ž0-9\x20-\x7F]"}}
+
+{{$moderujeme := true}}
+{{range $kategorie := $ignore_kategorie_divné}}
+	{{if eq $kategorie $.Channel.ParentID}}
+		{{$moderujeme = false}}
+	{{end}}
+{{end}}
+
+{{$text := .Message.Content}}
+{{if and  $text $moderujeme}}
+	{{$divné := len (reFindAll $emojiregex $text)}}
+	{{range $emoji := (reFindAll $emojiregex $text)}}
+		{{$text = reReplace $emojiregex $text ""}}
+	{{end}}
+	{{$celek := (len $text)|add $divné}}
+	{{$divné = add $divné (len (reFindAll $charregex $text))}}
+	{{$ratio := div (toFloat $divné ) (toFloat $celek )}}
+	{{if and (ge $ratio 0.33) (ge $divné 5)}}
+		{{sendMessage nil (joinStr "" "<@682293889759313960> zachytilo by s poměrem " $ratio " a počtem " $divné) }}
+	{{end}}
+{{end}}
+
+{{/*náhrada nesprávně odeslaných emoji ve zprávách*/}}
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: .*
+	Trigger Type: regex
+*/}}
+
+{{$text := .Message.Content}}
+{{if and  $text $moderujeme}}
+	{{$divné := len (reFindAll $emojiregex $text)}}
+	{{range $emoji := (reFindAll $emojiregex $text)}}
+		{{$text = reReplace $emojiregex $text ""}}
+	{{end}}
+	{{$celek := (len $text)|add $divné}}
+	{{$divné = add $divné (len (reFindAll $charregex $text))}}
+	{{$ratio := div (toFloat $divné ) (toFloat $celek )}}
+	{{if and (ge $ratio 0.33) (ge $divné 5)}}
+		{{sendMessage nil (joinStr "" "<@682293889759313960> zachytilo by s poměrem " $ratio " a počtem " $divné) }}
+	{{end}}
+{{end}}
+
+{{$ignore_emoji := cslice 804697135814803476 874949678066696202 874942892173582357}}
+
+{{/*
+	animované emoji budou převzaté automaticky (s nějakým zpožděním)
+	pokud by z nějakého důvodu dané emoji nefungovalo, lze ho ručně definovat do $emoji_dynamic (animované) a $emoji_static (neanimované) (ruční definice mají prioritu)
+*/}}
+
+{{$emoji_dynamic := sdict "RareSloth" "<a:RareSloth:978374943836360764>"}} 
+
+{{$emoji_static := sdict "KEKL" "<:KEKL:978740313407492096>"}}
+
+{{range $emoji := .Guild.Emojis}}
+	{{if and (reFind "^<a:" $emoji.MessageFormat) (not ($emoji_dynamic.Get $emoji.Name))}}
+		{{$emoji_dynamic.Set $emoji.Name $emoji.MessageFormat}}
+	{{else if not ($emoji_static.Get $emoji.Name)}}
+		{{$emoji_static.Set $emoji.Name $emoji.MessageFormat}}
+	{{end}}
+{{end}}
+
+
+{{$zpráva_stará := reSplit ":" .Message.Content -1}}
+{{$odeslat := false}}
+{{$zpráva_nová  := "  "}}
+
+{{range $segment := $zpráva_stará}}
+	{{if $emoji_dynamic.Get $segment}}
+		{{if ne $.Message.Content $segment}}
+			{{$odeslat = true}}
+		{{end}}
+		{{$segment = ($emoji_dynamic.Get $segment)}}
+		{{$zpráva_nová = slice $zpráva_nová 0 (len $zpráva_nová|add -1)}}
+	{{else if $emoji_static.Get $segment}}
+		{{$segment = ($emoji_static.Get $segment)}}
+		{{$zpráva_nová = slice $zpráva_nová 0 (len $zpráva_nová|add -1)}}
+	{{else}}
+		{{$segment = joinStr "" $segment ":"}}
+	{{end}}
+	{{$zpráva_nová = joinStr "" $zpráva_nová $segment}}
+{{end}}
+{{$zpráva_nová = slice $zpráva_nová 0 (len $zpráva_nová|add -1)}}
+
+{{if .Message.Content}}
+	{{if or (reFind "^-emoji(-react)?" .Message.Content) (reFind "(?i)<a:[a-ž]{1,30}:[0-9]{17,19}>" .Message.Content)}}
+		{{$odeslat = false}}
+	{{end}}
+{{end}}
+
+{{range $kanál := $ignore_emoji}}
+	{{if eq $kanál $.Channel.ID}}
+		{{$odeslat = false}}
+	{{end}}
+{{end}}
+
+{{if $odeslat}}
+	{{$embed := cembed "description" $zpráva_nová "author" (sdict "name" .User.String "icon_url" (.Message.Author.AvatarURL "1024")) "footer" (sdict  "text" (joinStr "" "ID:" .User.ID)) "timestamp" currentTime}}
+	{{sendMessage nil $embed}}
+	{{if not (or .Message.Mentions .Message.MentionRoles .Message.MentionEveryone (ge (len $zpráva_nová) 1900) .Message.Attachments ) }}
+		{{deleteTrigger 0}}
+	{{end}}
+{{end}}
+
+{{if eq .Channel.ID 808618111917883404}}
+{{/*
+	seznam všech nemoderátorských příkazů
+ 
+	Trigger .*
+	Trigger Type: Regex
+ 
+	Usage:
+	Just type :)
+ 
+	Copyright (c): Black Wolf, 2021
+	License: MIT
+	Repository: https://github.com/BlackWolfWoof/yagpdb-cc/
+*/}}
+ 
+{{$message := cembed "title" "**Seznam příkazů:**" `description` (joinStr `` 
+`**Rank:**` "\n"
+`-rank` "\n"
+`-lb` "\n"
+`-leaderboard` "\n"
+"\n"
+`**Zábava:**` "\n"
+`?iq` "\n"
+`?laska` "\n"
+`?otazka [dotaz]` "\n"
+`?sance [dotaz]` "\n"
+`?prikazy` "\n"
+"\n"
+`**A dále máme zkratky na řetězce 4 emoji:**` "\n"
+`*h (<:pepeLove:926794184516595762>)` "\n"
+`*k (<:KEKWtest:805466129497587752>)` "\n"
+`*r  (<:Ree:806954946641133619>)` "\n"
+`*p (<:Pog:805466129257463808>)` "\n"
+"\n"
+`**Nemáte nitro, a chcete používat animované emoji?**` "\n"
+`-emoji :animované_emoji: => pošle YAG do (současného) kanálu` "\n"
+`-emoji-react :animované_emoji: MsgID  => přidá jako reakci na určenou zprávu ze současného kanálu` "\n"
+"\n"
+`**Statistiky počítání:**` "\n"
+`Kolikrát někdo počítal:` "\n"
+`*?count [volitelně @uživatel]*` "\n"
+`Leaderboard počítání:` "\n"
+`*?topcount*` "\n"
+"\n"
+`**Návrhy:**` "\n"
+`-suggest [návrh]` `=> předloží návrh` "\n"
+`-deletesuggestion [ID návrhu]` `=> smaže (vlastní) návrh` "\n"
+`-editsuggestion [ID návrhu] [Nový návrh]` `=> upraví (vlastní) návrh na [Nový návrh]` "\n"
+"\n"
+`**A pokud se cítíte štědře, bumpněte prosím náš server.** <:pepeLove:926794184516595762>` "\n"
+`/bump` "\n"
+)}}
+{{/* do not edit below */}}
+{{if $db := dbGet .Channel.ID "stickymessage"}}
+	{{deleteMessage nil (toInt $db.Value) 0}}
+{{end}}
+{{$id := sendMessageRetID nil $message}}
+{{dbSet .Channel.ID "stickymessage" (str $id)}}
+{{end}}
+
+{{if eq .Channel.ID 882291917918974032}}
+{{/*
+	dokumentace k návrhům
+ 
+	Trigger .*
+	Trigger Type: Regex
+ 
+	Usage:
+	Just type :)
+ 
+	Copyright (c): Black Wolf, 2021
+	License: MIT
+	Repository: https://github.com/BlackWolfWoof/yagpdb-cc/
+*/}}
+ 
+{{$message := cembed `description` (joinStr `` 
+`**Návrhy:**` "\n"
+`-suggest [návrh]` `=> předloží návrh` "\n"
+`-deletesuggestion [ID návrhu]` `=> smaže (vlastní) návrh` "\n"
+`-editsuggestion [ID návrhu] [Nový návrh]` `=> upraví (vlastní) návrh na [Nový návrh]` "\n"
+)}}
+{{/* do not edit below */}}
+{{if $db := dbGet .Channel.ID "stickymessage"}}
+	{{deleteMessage nil (toInt $db.Value) 0}}
+{{end}}
+{{$id := sendMessageRetID nil $message}}
+{{dbSet .Channel.ID "stickymessage" (str $id)}}
+{{end}}
