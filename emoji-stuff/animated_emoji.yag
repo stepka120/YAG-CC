@@ -1,32 +1,35 @@
 {{/*
-	Trigger type: Regex
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
 	Trigger: ^-emoji(-react)?
+	Trigger Type: regex
 */}}
- 
+
 {{/*
 	animované emoji budou převzaté automaticky (s nějakým zpožděním)
 	pokud by z nějakého důvodu dané emoji nefungovalo, lze ho ručně definovat do $emojis_list (ruční definice mají prioritu)
 */}}
- 
+
 {{$emojis_list := "<a:RareSloth:978374943836360764>"}}
- 
+
 {{$extra_emojis_list := "<:peepoHeart:916731194215915550>"}}
- 
+
 {{range $emoji := .Guild.Emojis}}
 	{{if reFind "^<a:" $emoji.MessageFormat}}
 		{{$emojis_list = joinStr "" $emojis_list $emoji.MessageFormat}}
 	{{end}}
 {{end}}
- 
- 
+
+
 {{if  (reFind " " .StrippedMsg)}}
 	{{$emoji_name := (index .Args 1)}}
 	{{$regex1 := joinStr "" "<a:?" $emoji_name ":?[0-9]{18}>" }}
 	{{$regex2 := joinStr "" "a:?" $emoji_name ":?[0-9]{18}"}}
- 
+
 	{{$regex3 := joinStr "" "<:?" $emoji_name ":?[0-9]{18}>" }}
 	{{$regex4 := joinStr "" ":?" $emoji_name ":?[0-9]{18}"}}
- 
+
 	{{if reFind $regex1 $emojis_list}}
 		{{if eq (index .Args 0) "-emoji"}}
 			{{sendMessage nil (joinStr " " "Emoji od:" .User.Mention)}}
