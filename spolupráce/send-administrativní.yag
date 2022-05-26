@@ -1,0 +1,28 @@
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: send
+	Trigger Type: command
+	omezit pouze na moderační a partnershipové role
+*/}}
+
+{{$posuzovací_kanál_ID := 874950407657508895}}
+{{$spolupráce_žádost_ID := 874948110542045214}}
+{{$spolupráce_posuzovaná_ID := 874948239978299393}}
+
+{{$mentioned_id := "No user"}}
+{{with .Message.Mentions}}
+{{$mentioned_id = (index . (sub (len .) 1)).ID}}
+{{end}}
+
+
+{{if ne (str $mentioned_id) "No user"}}
+	{{$text := reReplace "^-send" .Message.Content ""}}
+	{{takeRoleID $mentioned_id $spolupráce_žádost_ID}}
+	{{giveRoleID $mentioned_id $spolupráce_posuzovaná_ID}}
+	{{$x := sendMessageRetID $posuzovací_kanál_ID $text}}
+	{{addMessageReactions $posuzovací_kanál_ID $x ":peepo_yes:865667247530573824" ":peepo_no:865667279920693258"}}
+{{else}}
+**Chyba: chybí zmínka žadatele**
+{{end}}
