@@ -7,7 +7,7 @@
 {{$ruleset := "raid"}}
 {{/*Replace placeholder by the name of your automod v2 ruleset. Make sure they are the same or else it will not work!*/}}
  
-{{$people := 3}}
+{{$people := nonInt}}
 {{$entries := dbCount "join_track"}}
  
 {{if and (lt $entries $people) (reFind (print $ruleset ": Enabled") (execAdmin "automod r"))}}
