@@ -14,7 +14,7 @@
 {{$ruleset := "raid"}}
 {{/*Replace placeholder by the name of your automod v2 ruleset. Make sure they are the same or else it will not work!*/}}
 
-{{$seconds := 15}}{{$people := 3}}
+{{$seconds := nonInt}}{{$people := nonInt}}
 {{/*This will activate the code if $people (example 5) join within $seconds (example 60)*/}}
 
 {{$effect := "ban"}}
