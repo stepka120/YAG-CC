@@ -10,6 +10,7 @@
 {{$spolupráce_schválené_kanál_ID := 887943837836783656}}
 {{$spolupráce_kanál_ID := 804697135814803476}}
 {{$spolupráce_role_ID := 806104804022812702}}
+{{$spolupráce_posuzovaná_role_ID := 874948239978299393}}
 {{$ping_spolupráce_role_ID := 824328267934203905}}
 {{$instrukce := "Spolupráce byla hlasováním schválena, více informací a náš partnership text naleznete v ticketu."}}
 
@@ -27,6 +28,7 @@
 	{{$ping_spolupráce = " "}}
 {{end}}
 
+{{takeRoleID $mentioned_id $spolupráce_posuzovaná_role_ID}}
 {{giveRoleID $mentioned_id $spolupráce_role_ID}}
 {{$msg := (getMessage $spolupráce_schválené_kanál_ID $msgID).Content}}
 {{$msgS := (reReplace "@everyone" $msg "")}}
