@@ -6,20 +6,6 @@
 	Trigger Type: regex
 */}}
 
-{{$text := .Message.Content}}
-{{if and  $text $moderujeme}}
-	{{$divné := len (reFindAll $emojiregex $text)}}
-	{{range $emoji := (reFindAll $emojiregex $text)}}
-		{{$text = reReplace $emojiregex $text ""}}
-	{{end}}
-	{{$celek := (len $text)|add $divné}}
-	{{$divné = add $divné (len (reFindAll $charregex $text))}}
-	{{$ratio := div (toFloat $divné ) (toFloat $celek )}}
-	{{if and (ge $ratio 0.33) (ge $divné 5)}}
-		{{sendMessage nil (joinStr "" "<@682293889759313960> zachytilo by s poměrem " $ratio " a počtem " $divné) }}
-	{{end}}
-{{end}}
-
 {{$ignore_emoji := cslice 804697135814803476 874949678066696202 874942892173582357}}
 
 {{/*
