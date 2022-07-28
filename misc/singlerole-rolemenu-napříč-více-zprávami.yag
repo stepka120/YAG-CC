@@ -1,0 +1,39 @@
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+
+	podporuje neomezené množství zpráv a (max) 20 rolí na zprávě (každé)
+	význam prvního sdictu v $role je platný pro první msgID v $MsgID, druhého pro druhý...
+*/}}
+ 
+ 
+{{$MsgID := cslice 1002292681499754556 1002292722658459688}}
+{{$role := cslice (sdict "🇦" "1002128478843449435" "🇧" "1002128476989575239" "🇨" "1002128502528688148" "🇩" "1002153044647092294" "🇪" "1002153061864718417" "🇫" "1002153069829693440" "🇬" "1002153077152960612" "🇭" "1002153084606222396" "🇮" "1002153557199429704" "🇯" "1002153561670553651" "🇰" "1002154676176830494" "🇱" "1002154851788136448" "🇲" "1002154856301207563" "🇳" "1002154866770190346" "🇴" "1002156722657439754" "🇵" "1002156741095596032" "🇶" "1002156744178409563" "🇷" "1002167356505735198" "🇸" "1002167732055318539" "🇹" "1002168035072802896") (sdict "🇦" "1002168048112914492" "🇧" "1002168487701127308" "🇨" "1002168936994979840" "🇩" "1002168942128812077" "🇪" "1002171720460927107" "🇫" "1002171863549616138" "🇬" "1002172422641958963")}}
+{{$ValidMSG := false}}
+{{$MsgIndex := 0}}
+
+{{range $i, $ID := $MsgID}}
+	{{if eq $ID $.ReactionMessage.ID}}
+		{{$ValidMSG = true}}
+		{{$MsgIndex = $i}}
+	{{end}}
+{{end}}
+{{if and $ValidMSG ((index $role $MsgIndex).Get .Reaction.Emoji.Name)}}
+	{{if .ReactionAdded}}
+		{{range $j, $roleDict := $role}}
+			{{range $emoji, $roleID := $roleDict}}
+				{{if and (hasRoleID $roleID) (ne  (str $roleID) (str ($roleDict.Get $.Reaction.Emoji.Name)))}}
+					{{removeRoleID $roleID}}
+					{{deleteMessageReaction nil (index $MsgID $j) $.User.ID $emoji}}
+				{{end}}
+			{{end}}
+		{{end}}
+
+
+
+		{{addRoleID ((index $role $MsgIndex).Get .Reaction.Emoji.Name)}}
+	{{else}}
+		{{removeRoleID ((index $role $MsgIndex).Get .Reaction.Emoji.Name)}}
+	{{end}}
+{{end}}
