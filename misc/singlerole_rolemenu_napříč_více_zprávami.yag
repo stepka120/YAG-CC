@@ -23,7 +23,7 @@
 	{{if .ReactionAdded}}
 		{{range $j, $roleDict := $role}}
 			{{range $emoji, $roleID := $roleDict}}
-				{{if and (hasRoleID $roleID) (ne  (str $roleID) (str ($roleDict.Get $.Reaction.Emoji.Name)))}}
+				{{if (hasRoleID $roleID)}}
 					{{removeRoleID $roleID}}
 					{{deleteMessageReaction nil (index $MsgID $j) $.User.ID $emoji}}
 				{{end}}
