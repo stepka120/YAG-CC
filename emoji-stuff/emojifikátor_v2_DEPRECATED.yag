@@ -1,0 +1,74 @@
+{{/*náhrada nesprávně odeslaných emoji ve zprávách*/}}
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: .*
+	Trigger Type: regex
+*/}}
+
+{{try}}
+{{$ignore_emoji := cslice 804697135814803476 874949678066696202 874942892173582357}}
+ 
+{{/*
+	animované emoji budou převzaté automaticky (s nějakým zpožděním)
+	pokud by z nějakého důvodu dané emoji nefungovalo, lze ho ručně definovat do $emoji_dynamic (animované) a $emoji_static (neanimované) (ruční definice mají prioritu)
+*/}}
+ 
+{{$emoji_dynamic := sdict }} 
+ 
+{{$emoji_static := sdict }}
+ 
+{{range $emoji := .Guild.Emojis}}
+	{{- if and (eq (slice $emoji.MessageFormat 0 3) "<a:") (not ($emoji_dynamic.Get $emoji.Name)) -}}
+		{{- $emoji_dynamic.Set $emoji.Name $emoji.MessageFormat -}}
+	{{- else if not ($emoji_static.Get $emoji.Name) -}}
+		{{- $emoji_static.Set $emoji.Name $emoji.MessageFormat -}}
+	{{- end -}}
+{{end}}
+ 
+{{$zpráva := joinStr "" " " .Message.Content}}
+{{$odeslat := false}}
+
+{{$zpráva_detekční := ""}}
+{{range $segment := (reSplit ":" $zpráva -1)}}
+	{{- $zpráva_detekční = joinStr "::" $zpráva_detekční $segment -}}
+{{end}}
+
+{{$content := joinStr "" .Message.Content "            "}}
+{{if not (reFind "(?i)<a:[^:]+:[0-9]{17,20}>" $content)}}
+	{{$safeMatch := ""}}
+	{{range $match := (reFindAll ":[^:]+:" $zpráva_detekční)}}
+		{{- $safeMatch = slice $match 1 (len $match|add -1) -}}
+		{{- if $emoji_dynamic.Get $safeMatch -}}
+			{{- $zpráva = reReplace (reQuoteMeta $match) $zpráva ($emoji_dynamic.Get $safeMatch) -}}
+			{{- $emoji_dynamic.Del $safeMatch -}}
+			{{- $odeslat = true -}}
+		{{- end -}}
+	{{end}}
+{{end}}
+
+{{if or (eq (slice $content 0 6) "-emoji") (eq (slice $content 0 6) "-react") (eq (slice $content 0 9) "-reaction") (eq (slice $content 0 12) "-emoji-react") }}
+	{{$odeslat = false}}
+{{end}}
+ 
+{{range $kanál := $ignore_emoji}}
+	{{- if eq $kanál $.Channel.ID -}}
+		{{- $odeslat = false -}}
+	{{- end -}}
+{{end}}
+ 
+{{if $odeslat}}
+	{{$embed := cembed "title" "**BETAVERZE**" "description" $zpráva "author" (sdict "name" .User.String "icon_url" (.Message.Author.AvatarURL "1024")) "footer" (sdict  "text" (joinStr "" "ID:" .User.ID)) "timestamp" currentTime}}
+	{{sendMessage nil $embed}}
+	{{if not (or .Message.Mentions .Message.MentionRoles .Message.MentionEveryone (ge (len $zpráva) 1900) .Message.Attachments ) }}
+		{{deleteTrigger 0}}
+	{{end}}
+{{end}}
+{{catch}}
+	{{ if eq .Error "too many potential discord api calls function" }}
+		{{sendMessage nil "příliš mnoho emoji, emojifikátor selhal"}}
+	{{ else }}
+		{{ .Error }}
+	{{ end }}
+{{ end }}
