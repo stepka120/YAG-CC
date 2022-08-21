@@ -5,7 +5,7 @@
 	Trigger: .*
 	Trigger Type: regex
 */}}
-{{$ignore_emoji := cslice 804697135814803476 874949678066696202 874942892173582357}}
+{{$ignore_emoji := cslice 1008038828692475954 804697135814803476 874949678066696202 874942892173582357}}
  
 {{/*
 	animované emoji budou převzaté automaticky (s nějakým zpožděním)
