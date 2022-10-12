@@ -1,0 +1,11 @@
+{{/*
+	Trigger Type: Warn DM
+	Save this code in 'Tools & Utilities > Moderation > Warnings > Warn DM'
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+*/}}
+
+{{if eq .Reason "Automoderator:\nRESERVED: handler automatiky spolupráce"}}
+	{{execCC 80 nil 2 (joinStr "" "delwarn" .WarningID)}}
+{{end}}
