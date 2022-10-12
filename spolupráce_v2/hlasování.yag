@@ -1,0 +1,58 @@
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: added +removed reaction
+	Trigger Type: reaction
+	omezit na hlasovací kanál spoluprácí
+*/}}
+ 
+ 
+{{$schválené_kanál_ID := 887943837836783656}}
+{{$zamítnuté_kanál_ID := 874950089314029588}} 
+{{$spolupráce_posuzovaná_ID := 874948239978299393}}
+ 
+ 
+{{$převaha := 2}}
+ 
+{{$up := 0}}{{$down := 0}}
+{{range (getMessage nil .ReactionMessage.ID).Reactions}}
+{{if eq .Emoji.MessageFormat "<:peepo_yes:865667247530573824>"}}
+{{$up = .Count}}
+{{else if eq .Emoji.MessageFormat "<:peepo_no:865667279920693258>"}}
+{{$down = .Count}}
+{{end}}
+{{end}}
+ 
+{{$mentioned_id := "No user"}}
+{{with .Message.Mentions}}
+{{$mentioned_id = (index . (sub (len .) 1)).ID}}
+{{end}}
+ 
+{{$ticketID := toInt (reFind "\\d+" (index .Message.Embeds 0).Footer.Text) }}
+{{$dict := (dbGet $ticketID "žádost spolupráce").Value}}
+ 
+ 
+{{if le (add $down $převaha)  $up}} {{/* spolupráce byla schválena */}}
+	{{sendMessage $ticketID "Vaše žádost o spolupráci byla hlasováním schválena, nyní si prosím ověřte, že váš níže uvedený partnership text je v pořádku."}}	
+	{{sendMessage $ticketID .Message.Content}}
+	{{takeRoleID $mentioned_id $spolupráce_posuzovaná_ID}}
+	{{$x := sendMessageRetID $schválené_kanál_ID .Message.Content}}
+	{{deleteAllMessageReactions nil .Reaction.MessageID }}
+	{{addReactions ":white_check_mark:"}}
+	{{$dict.Set "up" $up }}
+	{{$dict.Set "down" $down }}
+	{{$dict.Set "schválenámsgID" $x}}
+	{{dbSetExpire $ticketID "žádost spolupráce" $dict 2592000}}
+{{end}}
+ 
+{{if le (add $up $převaha)  $down}} {{/* spolupráce byla zamítnuta */}}
+	{{deleteAllMessageReactions nil .Reaction.MessageID }}
+	{{addReactions ":x:"}}
+	{{sendMessage $ticketID (joinStr " " (userArg $mentioned_id).Mention  "Vaše žádost o spolupráci byla hlasováním zamítnuta.\nVýsledky byly" (sub $up 1) "pro a" (sub $down 1) "proti.")}}	
+	{{takeRoleID $mentioned_id $spolupráce_posuzovaná_ID}}
+	{{$x := sendMessageRetID $zamítnuté_kanál_ID .Message.Content}}
+	{{$dict.Set "up" $up }}
+	{{$dict.Set "down" $down }}
+	{{dbSetExpire $ticketID "žádost spolupráce" $dict 2592000}}
+{{end}}
