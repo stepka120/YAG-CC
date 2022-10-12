@@ -1,0 +1,29 @@
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: ^-pozv(a|á)nka
+	Trigger Type: regex
+	omezit na pouze moderační + partnershipové role
+*/}}
+
+```**HELP FOR STUDENTS** 
+**__Co zde můžeš najít?__** 
+ 📚 • Poradny s učivem a aktivními poradci! 
+ ⚡ • Příjemnou a slušnou komunitu! 
+ 🤝 • Možnost spolupráce!
+  ✏ • Speciální kanály, kde najdete významné osobnosti, významné činy, zajímavé citáty nebo zajímavá slova! 
+ 👩‍🏫 • Poradce na každý předmět!
+ 👨‍🏫 • Předmětové role!
+ 🔢 • Minihry! (Počítání, slovní fotbal, doplň větu)
+ 🎮 •  Kanál na odreagování (Hry a zábava)
+ 🤖 • Zábavné příkazy
+**__Něco o projektu__**
+Tento projekt byl založen v říjnu 2020 proto, že jsme se všichni ocitli s distanční výukou ve složité situaci. Myšlenkou serveru bylo a je společně sdílet naše postřehy z distanční výuky vůči normální škole, pomáhat si s úkoly, nebo si nechat vysvětlit komplikovaná témata, které vám nezvládli vysvětlit učitelé. Toto není server pouze pro šprty. Je to server pro všechny. Jsme v tom všichni spolu :)
+**__Tento projekt je určen žákům/studentům od 1. stupně základních škol až po maturitní ročníky středních škol (či odborných učilišť)__** 
+**__Invites__**
+   Default Invite • https://discord.gg/VADMTXnRNS
+   Custom Invite • https://dsc.gg/hfs 
+   Banner: https://media.discordapp.net/attachments/825390510788313094/828554232608456714/standard_2.gif```
+ 
+ {{sendMessage nil "pokud chcete, aby nebylo dalším kopírováním ztraceno formátování, dejte před i za ```"}}
