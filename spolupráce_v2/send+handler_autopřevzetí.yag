@@ -1,0 +1,136 @@
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: ^(`|```)?-send
+	Trigger Type: regex
+	omezit pouze na moderační a partnershipové role
+*/}}
+
+{{$prodleva := 86400}}
+
+{{$posuzovací_kanál_ID := 874950407657508895}}
+{{$spolupráce_posuzovaná_ID := 874948239978299393}}
+{{$admin_chat_ID := 841234678018342913}}
+{{$partnership_manager_ID := 825388496360702002}}
+{{$management_roles := cslice 797890666000154644 825720017319493692 825388496360702002}}
+
+
+{{$schválené_kanál_ID := 887943837836783656}}
+{{$zamítnuté_kanál_ID := 874950089314029588}} 
+
+{{$mentioned_id := "No user"}}
+
+{{if and (not (reFind "delwarn\\d+" (toString .ExecData))) .ExecData}}
+	{{if and (getMessage nil .ExecData)}}
+		{{if ne (len (getMessage nil .ExecData).Reactions) 1}}
+			{{sendMessageNoEscape $admin_chat_ID (joinStr "" "<@&" $partnership_manager_ID "> <:FeelsWowMan:916735370622824448> https://discord.com/channels/" .Guild.ID "/" $posuzovací_kanál_ID "/" .ExecData)}}
+			{{execCC .CCID $posuzovací_kanál_ID $prodleva (joinStr "" "rozhodni" .ExecData)}}
+		{{end}}	
+	{{else if and (reFind "rozhodni[0-9]+" (toString .ExecData)) (getMessage nil (reFind "[0-9]+" (toString .ExecData)))}}
+		{{$up := 0}}{{$down := 0}}
+		{{range (getMessage nil (reFind "[0-9]+" .ExecData)).Reactions}}
+			{{if eq .Emoji.MessageFormat "<:peepo_yes:865667247530573824>"}}
+			{{$up = .Count}}
+			{{else if eq .Emoji.MessageFormat "<:peepo_no:865667279920693258>"}}
+			{{$down = .Count}}
+			{{end}}
+
+		
+		{{with (getMessage nil (reFind "[0-9]+" $.ExecData)).Mentions}}
+		{{$mentioned_id = (index . (sub (len .) 1)).ID}}
+		{{end}}
+		{{end}}
+
+		{{$ticketID := toInt (reFind "\\d+" (index (getMessage nil (reFind "[0-9]+" $.ExecData)).Embeds 0).Footer.Text) }}
+		{{$dict := (dbGet $ticketID "žádost spolupráce").Value}}
+
+		{{if gt $up $down}}
+			{{sendMessage $ticketID "Vaše žádost o spolupráci byla hlasováním schválena, nyní si prosím ověřte, že váš níže uvedený partnership text je v pořádku."}}
+			{{sendMessage $ticketID (getMessage nil (reFind "[0-9]+" $.ExecData)).Content}}
+			{{takeRoleID $mentioned_id $spolupráce_posuzovaná_ID}}
+			{{sendMessage $schválené_kanál_ID (getMessage nil (reFind "[0-9]+" $.ExecData)).Content}}
+			{{deleteAllMessageReactions nil (getMessage nil (reFind "[0-9]+" $.ExecData)).ID }}
+			{{addMessageReactions nil (getMessage nil (reFind "[0-9]+" $.ExecData)).ID ":white_check_mark:"}}
+			{{$dict.Set "up" $up }}
+			{{$dict.Set "down" $down }}
+			{{dbSetExpire $ticketID "žádost spolupráce" $dict 2592000}}
+		{{else if ne (len (getMessage nil (reFind "[0-9]+" $.ExecData)).Reactions) 1}}
+			{{deleteAllMessageReactions nil (getMessage nil (reFind "[0-9]+" $.ExecData)).ID }}
+			{{addMessageReactions nil (getMessage nil (reFind "[0-9]+" $.ExecData)).ID ":x:"}}
+			{{sendMessage $ticketID (joinStr " " (userArg $mentioned_id).Mention  "Vaše žádost o spolupráci byla hlasováním zamítnuta.\nVýsledky byly" (sub $up 1) "pro a" (sub $down 1) "proti.")}}
+			{{takeRoleID $mentioned_id $spolupráce_posuzovaná_ID}}
+			{{sendMessage $zamítnuté_kanál_ID (getMessage nil (reFind "[0-9]+" $.ExecData)).Content}}
+			{{$dict.Set "up" $up }}
+			{{$dict.Set "down" $down }}
+			{{dbSetExpire $ticketID "žádost spolupráce" $dict 2592000}}
+		{{end}}
+	{{end}}
+{{else}}
+	{{with .Message.Mentions}}
+	{{$mentioned_id = (index . (sub (len .) 1)).ID}}
+	{{end}}
+
+	{{$manager := false}}
+	{{range $role := $management_roles}}
+		{{if hasRoleID $role}}
+			{{$manager = true}}
+		{{end}}
+	{{end}}
+
+	{{$ticketID := toInt .Channel.ID}}
+
+	{{if $manager}}
+		{{if ne (str $mentioned_id) "No user"}}
+			{{if (getChannel (reFind "\\d+" .Message.Content))}}
+				{{$ticketID = toInt (reFind "\\d+" .Message.Content)}}
+				{{$text := reReplace "^-send (<#)?\\d+>?" .Message.Content ""}}
+				{{$embed := cembed "footer" (sdict  "text" (joinStr "" "TicketID: " $ticketID))}}
+				{{giveRoleID $mentioned_id $spolupráce_posuzovaná_ID}}
+				{{$x := sendMessageRetID $posuzovací_kanál_ID (complexMessage "content" $text "embed" $embed)}}
+				{{addMessageReactions $posuzovací_kanál_ID $x ":peepo_yes:865667247530573824" ":peepo_no:865667279920693258"}}
+				{{dbSetExpire $ticketID "žádost spolupráce" (sdict "userID" $mentioned_id "hlasovacímsgID" $x) 2592000}}
+				{{execCC .CCID $posuzovací_kanál_ID $prodleva $x}}
+				Žádost úspěšně zadána
+			{{else}}
+				**Chyba: chybí kanál**
+			{{end}}
+		{{else}}
+		**Chyba: chybí zmínka žadatele**
+		{{end}}
+	{{else if or (and (reFind "ticket-" .Channel.Name) (not (dbGet .Channel.ID "žádost spolupráce"))) (reFind "delwarn\\d+" (toString .ExecData))}}
+		{{$text := ""}}
+		{{$odeslat := false}}
+		{{if (reFind "delwarn\\d+" (toString .ExecData))}}
+			{{$chnlpins := (getChannelPins nil)}}
+			{{$text = reReplace "^```-send|```$" (index (index $chnlpins (len $chnlpins|add -1)).Embeds 0).Description ""}}
+			{{$mentioned_id = reFind "\\d+" (index $chnlpins (len $chnlpins|add -1)).Content}}
+			{{$silent := execAdmin "delwarn" (reFind "\\d+" (toString .ExecData))}}
+			{{if not (dbGet (toInt $mentioned_id) "žádost o spolupráci")}}
+				{{dbSetExpire (toInt $mentioned_id) "žádost o spolupráci" "true" 60}}
+				{{$odeslat = true}}
+			{{end}}
+		{{else}}
+			{{$odeslat = true}}
+			{{$mentioned_id = .User.ID}}
+			{{$text = .StrippedMsg}}
+			{{if reFind "`" .Cmd}}
+				{{$text = reReplace "(```|`)$" $text ""}}
+			{{end}}
+		{{end}}
+		{{if and (ge (len $text) 2) $odeslat}}
+			{{$text = joinStr " " $text (userArg $mentioned_id).Mention}}
+			{{$embed := cembed "footer" (sdict  "text" (joinStr "" "TicketID: " $ticketID))}}
+			{{giveRoleID $mentioned_id $spolupráce_posuzovaná_ID}}
+			{{$x := sendMessageRetID $posuzovací_kanál_ID (complexMessage "content" $text "embed" $embed)}}
+			{{addMessageReactions $posuzovací_kanál_ID $x ":peepo_yes:865667247530573824" ":peepo_no:865667279920693258"}}
+			{{execCC .CCID $posuzovací_kanál_ID $prodleva $x}}
+			{{dbSetExpire $ticketID "žádost spolupráce" (sdict "userID" $mentioned_id "hlasovacímsgID" $x) 2592000}}
+			{{(userArg $mentioned_id).Mention}} Vaše spolupráce je nyní v procesu schvalování, o jeho výsledku budete informován/a.
+		{{else if $odeslat}}
+		**Chyba: chybí partnership text**
+		{{end}}
+	{{else if (dbGet .Channel.ID "žádost spolupráce")}}
+		**Chyba: již se vaše spolupráce posuzuje**
+	{{end}}
+{{end}}
