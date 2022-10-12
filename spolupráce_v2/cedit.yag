@@ -1,0 +1,55 @@
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: cedit
+	Trigger Type: command
+	omezit na pouze moderační + partnershipové role
+*/}}
+ 
+{{$spolupráce_rozhodované_kanál_ID := 874950407657508895}}
+{{$spolupráce_schválené_kanál_ID := 887943837836783656}}
+ 
+ 
+{{if (getChannel (reFind "\\d+" .Message.Content))}}
+	{{$ticketID := toInt (reFind "\\d+" .Message.Content)}}
+	{{$dict := (dbGet $ticketID "žádost spolupráce").Value}}
+ 
+	{{$rozhodovací := toInt ($dict.Get "hlasovacímsgID") }}
+	{{$schválená := toInt ($dict.Get "schválenámsgID") }}
+ 
+	{{$text := reReplace "^-cedit (<#)?\\d+>? " .Message.Content ""}}
+ 
+	{{$mentioned_id := "No user"}}
+	{{with .Message.Mentions}}
+	{{$mentioned_id = (index . (sub (len .) 1)).ID}}
+	{{end}}
+ 
+	{{if eq (toString $mentioned_id) "No user"}}
+**Chyba:** Chybí autor spolupráce
+syntax: `-cedit <channel> <text> <žadatel>`
+	{{else}}
+		{{$platné := false}}
+		{{if (getMessage $spolupráce_rozhodované_kanál_ID $rozhodovací) }}
+			{{$footerText := (index (getMessage $spolupráce_rozhodované_kanál_ID $rozhodovací).Embeds 0).Footer.Text}}
+			{{editMessage $spolupráce_rozhodované_kanál_ID $rozhodovací (complexMessageEdit "content" $text "embed" (cembed "footer" (sdict  "text" $footerText) ) )}}
+			{{addReactions "✅"}}
+			{{sendMessage nil (joinStr "" "Úprava v <#" $spolupráce_rozhodované_kanál_ID "> úspěšná.")}}
+			{{$platné = true}}
+			{{$dict.Set "userID" $mentioned_id}}
+			{{dbSetExpire $ticketID "žádost spolupráce" $dict 2592000}}
+		{{end}}
+		{{if (getMessage $spolupráce_schválené_kanál_ID $schválená)}}
+			{{editMessage $spolupráce_schválené_kanál_ID $schválená $text}}
+			{{addReactions "✅"}}
+			{{sendMessage nil (joinStr "" "Úprava v <#" $spolupráce_schválené_kanál_ID "> úspěšná.")}}
+			{{$platné = true}}
+		{{end}}
+		{{if not $platné}}
+			**Chyba:** žádná ze zpráv spojených s touto žádostí neexistuje 
+		{{end}}
+	{{end}}
+{{else}}
+**Chyba:** neplatná zmínka kanálu
+syntax: `-cedit <channel> <text> <žadatel>`
+{{end}}
