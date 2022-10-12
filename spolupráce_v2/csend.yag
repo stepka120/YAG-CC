@@ -1,0 +1,37 @@
+{{/*
+	Copyright (c): stepka120, 2022
+	License: MIT
+	Repository: https://github.com/stepka120/YAG-CC
+	Trigger: csend
+	Trigger Type: command
+	omezit na pouze moderační + partnershipové role
+*/}}
+ 
+{{$spolupráce_schvalování_kanál_ID := 874950407657508895}}
+{{$spolupráce_kanál_ID := 804697135814803476}}
+{{$spolupráce_role_ID := 806104804022812702}}
+{{$ping_spolupráce_role_ID := 824328267934203905}}
+ 
+{{if (getChannel (reFind "\\d+" .Message.Content))}}
+	{{$ticketID := toInt (reFind "\\d+" .Message.Content)}}
+	{{$dict := (dbGet $ticketID "žádost spolupráce").Value}}
+	{{$msgID := toInt ($dict.Get "hlasovacímsgID")}}
+	{{$msg := (getMessage $spolupráce_schvalování_kanál_ID $msgID).Content}}
+	{{$msgS := (reReplace "@(everyone|here)|<@&\\d+>" $msg "")}}	
+ 
+	{{$mentioned_id := $dict.Get "userID"}}
+ 
+	{{if (reFind " --noping" .Message.Content)}}
+		{{giveRoleID $mentioned_id $spolupráce_role_ID}}	
+		{{sendMessage $spolupráce_kanál_ID $msgS}}
+	{{else if (reFind " --spolupráce" .Message.Content)}}
+		{{giveRoleID $mentioned_id $spolupráce_role_ID}}
+		{{sendMessageNoEscape $spolupráce_kanál_ID (joinStr "" $msgS " <@&" $ping_spolupráce_role_ID ">")}}
+	{{else}}
+		{{sendMessage nil (complexMessage "content" $msgS "embed" (cembed "title" "zvolte možnost odeslání" "description" (joinStr "\n" "bez pingu: `-csend <channel> --noping`" "s pingem spolupráce `-csend <channel> --spolupráce`" )   ) "reply" .Message.ID    )}}
+ 
+	{{end}}
+{{else}}
+**Chyba:** neplatná zmínka kanálu
+syntax: `-csend <channel> <volitelně:parametr>`
+{{end}}
