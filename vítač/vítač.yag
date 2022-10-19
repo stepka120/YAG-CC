@@ -11,15 +11,24 @@
 {{$student_role_ID := 765221442760605706}}
 {{$logy_kanál_ID := 811220564181385236}}
 
-{{$trigger_roles := (cslice 765220529292181534 765220475156168774 765220667758608424 765220697924042762 765220732820520971 765221034034855977 765221069354827866 765220767008030760 765220831671615548 765220865608515604 765220913880367135 766328383336087592 801852988397977622 765221175424057355 765221222485065789 811306095900491816 765221250859401238 765225953906786314 765221283495280650 765221315317596171 765221370920828978 853643890212601866 765221398313566258 797370767112667156 810057003815796736 767694518858285076 767694600570667009 767694670200307712 824327999989612575 824328135847444490 824328197578555393 824328267934203905 883018227079331880 916024713409597461)}}
+{{$trigger_roles := (cslice 765220529292181534 765220475156168774 765220667758608424 765220697924042762 765220732820520971 765221034034855977 765221069354827866 765220767008030760 765220831671615548 765220865608515604 765220913880367135 766328383336087592 801852988397977622 765221175424057355 765221222485065789 811306095900491816 765221250859401238 765225953906786314 765221283495280650 765221315317596171 765221370920828978 853643890212601866 765221398313566258 797370767112667156 810057003815796736 767694518858285076 767694600570667009 767694670200307712 824327999989612575 824328135847444490 824328197578555393 824328267934203905 883018227079331880 916024713409597461 997190420784230562 989611831196782634 959175272849104968 973567764742676530 1024558128450256906)}}
 
 {{$předmětové_role_kanál_ID := 805111733982199818}}
 {{$pingovací_role_kanál_ID := 824326069745090660}}
 {{$chat_kanál_ID := 808618931757252609}}
-
-{{if not .ExecData}}
+{{$vítač := false}}
+{{if not (or .ExecData (reFind "--debug" .Message.Content))}}
 	{{$chat_kanál_ID = .Channel.ID}}
+	{{$vítač = true}}
 {{end}}
+{{if .ExecData}}
+	{{if eq .ExecData "vítač"}}
+		{{$vítač = true}}
+	{{end}}
+{{end}}
+
+
+
 {{$připomínka := (joinStr " " "\n" "A nezapomeň si v" (getChannel $předmětové_role_kanál_ID).Mention "zvolit předměty, které tě baví," "\n"
 "případně si v" (getChannel $pingovací_role_kanál_ID).Mention "nastavit upozornění.")}}
 
@@ -42,10 +51,43 @@ $jméno
 "Pokud máš nějaké dotazy ohledně učiva, obrať se do našich předmětových poraden, **a nezapomeň tam pingnout příslušnou roli**." "\n"
 "Pro vše ostatní tu máme náš skvělý chat, případně minihry." $připomínka)}}
 
-{{if and (getMember .User.ID) (not .User.Bot)}}
+{{if and (getMember .User.ID) (not .User.Bot) ($vítač) }}
 	{{sendMessage $chat_kanál_ID $Vítač}}
 	{{if not (hasRoleID $student_role_ID)}}
 		{{giveRoleID .User.ID $student_role_ID}}
 		{{sendMessage $logy_kanál_ID "**Pozor: Selhání autorole**"}}
 	{{end}}
 {{end}}
+
+
+
+{{$sus_roleID := 980387279342272562}}
+{{$prodleva := nonInt}}
+
+{{if and (not $vítač) (getMember .User.ID) }}
+	{{dbSetExpire .User.ID "příchozí" currentTime $prodleva}}
+	{{$příchodů := dbCount "příchozí"}}
+	{{if ge $příchodů 2}}
+		{{range dbTopEntries "příchozí" 2 0}}
+			{{/* {{giveRoleID .UserID $sus_roleID}}
+			{{takeRoleID .UserID $sus_roleID 604800}} */}}
+		{{end}}
+	{{end}}
+
+	{{$hranice := toFloat nonInt}}
+	{{$time := snowflakeToTime .User.ID}}
+	{{$days := fdiv (currentTime.Sub $time).Hours 24}}
+	{{$seconds := (sub $hranice $days|mult 86400.0|roundCeil|toInt)}}
+	{{if lt $days $hranice}}
+		{{giveRoleID .User.ID $sus_roleID}}
+		{{takeRoleID .User.ID $sus_roleID $seconds}}
+	{{end}}
+
+	{{if reFind `/[0-5]\.png` (.User.AvatarURL "256")}}
+		{{giveRoleID .UserID $sus_roleID}}
+		{{takeRoleID .UserID $sus_roleID 604800}}
+	{{end}}
+
+	{{scheduleUniqueCC .CCID $chat_kanál_ID 60 .User "vítač"}}
+{{end}}
+
