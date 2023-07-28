@@ -35,16 +35,29 @@
 				{{end}}
 			{{end}}
 			
-			{{if or (ge $addIndx (len $slice)) (lt $addIndx 0)}}
-				{{$newslice = $slice.Append $newQue}}
-			{{else}}
-				{{range $i, $question := $slice}}
+			{{$questions := split $newQue "\n"}}
+
+			
+			{{- if or (ge $addIndx (len $slice)) (lt $addIndx 0) -}}
+				{{range $i, $current_question := $questions}}
+					{{- if eq $i 0 -}}
+						{{- $newslice = $slice.Append $current_question -}}
+					{{- else -}}
+						{{- $newslice = $newslice.Append $current_question -}}
+					{{- end -}}
+				{{end}}
+			{{- else -}}
+				{{- range $i, $question := $slice -}}
 					{{- if eq $addIndx $i -}}
-						{{- $newslice = $newslice.Append $newQue -}}
+						{{- range $current_question := $questions -}}
+							{{- $newslice = $newslice.Append $current_question -}}
+						{{- end -}}
 					{{- end -}}
 					{{- $newslice = $newslice.Append $question -}}	
-				{{end}}
-			{{end}}
+				{{- end -}}
+			{{- end -}}
+			
+
 	
 		{{else if and (eq (index .Args 1) "remove") (ge (len .Args) 3)}}
 			{{$removeIndx := -1}}
