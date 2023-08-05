@@ -75,9 +75,11 @@
 				{{- if ne $removeIndx $i -}}
 					{{- $newslice = $newslice.Append $question -}}
 				{{- else -}}
-					{{- $response = joinStr "" "Odstraněna otázka ```" $question "``` z pozice " $i "." -}}
+					{{- $response = joinStr "" "Odstraněna otázka ```\n" $question "\n``` z pozice " $i "." -}}
 				{{- end -}}
 			{{end}}
+
+
 		{{else if and (eq (index .Args 1) "edit") (ge (len .Args) 4)}}
 			{{$removeIndx := -1}}
 		
@@ -91,12 +93,16 @@
 				{{- if ne $removeIndx $i -}}
 					{{- $newslice = $newslice.Append $question -}}
 				{{- else -}}
-					{{- $response = joinStr "" "Otázka na pozici " $i " byla změněna z ```" $question "``` na ```" $editQue "```" -}}
+					{{- $response = joinStr "" "Otázka na pozici " $i " byla změněna z ```\n" $question "\n``` na ```\n" $editQue "\n```" -}}
 					{{- $newslice = $newslice.Append $editQue -}}
 				{{- end -}}
 			{{end}}
+
+
 		{{else if eq (index .Args 1) "list"}}
 			{{$newslice = $slice}}
+
+
 		{{else if and (eq (index .Args 1) "send") (ge (len .Args) 3)}}
 			{{if ne (toString (toInt (index .Args 2))) (index .Args 2)}}
 				{{$chyba = true}}
@@ -108,8 +114,8 @@
 					{{$odeslat = false}}
 					{{sendMessage nil "index out of range"}}
 				{{end}}
-				
 			{{end}}
+
 			
 		{{else}}
 			{{$chyba = true}}
