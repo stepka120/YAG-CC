@@ -23,11 +23,11 @@
 	{{if (ge (len .Args) 2)}}
 		{{if and (eq (index .Args 1) "add") (ge (len .Args) 3)}}
 			{{$addIndx := -1}}
-			{{$newQue := (reReplace "(^-(questions?|qotd) add )| --mobile ?" .Message.Content "")}}
+			{{$newQue := (reReplace "(^-(questions?|qotd) add )| --mobile ?| --multiline ?" .Message.Content "")}}
 			{{$response = "Nebyla nalezena platná pozice, připojuji na konec."}}
 			{{if eq (toString (toInt (index .Args 2))) (index .Args 2)}}
 				{{$addIndx = toInt (index .Args 2)}}
-				{{$newQue = (reReplace "(^-(questions?|qotd) add -?\\d+ )| --mobile ?" .Message.Content "")}}
+				{{$newQue = (reReplace "(^-(questions?|qotd) add -?\\d+ )| --mobile ?| --multiline ?" .Message.Content "")}}
 				{{if or (ge $addIndx (len $slice)) (lt $addIndx 0)}}
 					{{$response = joinStr " " "Připojuji na pozici" (len $slice)}}
 				{{else}}
@@ -35,7 +35,11 @@
 				{{end}}
 			{{end}}
 			
-			{{$questions := split $newQue "\n"}}
+			{{if not (reFind " --multiline" .Message.Content)}} 
+				{{$questions := split $newQue "\n"}}
+			{{else}}
+				{{$questions := cslice $newQue}}
+			{{end}}
 
 			
 			{{- if or (ge $addIndx (len $slice)) (lt $addIndx 0) -}}
@@ -126,7 +130,7 @@
 		{{end}}
 		{{dbSet 0 "QOTD" $newslice}}
 	{{else if not $odeslat}}
-		{{sendMessage nil "**Chyba:** neznámý syntax\nPodporovaný syntax:\n-qotd add <volitelně:pozice> <otázka>\n-qotd remove <pozice>\n-qotd send <pozice>\n-qotd list\n-qotd edit <pozice> <nová otázka>"}}
+		{{sendMessage nil "**Chyba:** neznámý syntax\nPodporovaný syntax:\n-qotd add <volitelně:pozice> <otázka> <volitelně: další otázky na dalších řádcích>\n-qotd remove <pozice>\n-qotd send <pozice>\n-qotd list\n-qotd edit <pozice> <nová otázka>\nPodporované parametry:\n--mobile (fronta bude vypsaná jako zpráva)\n--multiline (pro přidání jedné víceřádkové otázky)"}}
 	{{end}}
 		
 {{else}}
@@ -152,6 +156,6 @@
 		{{$otázka = (execAdmin "topic")}}
 	{{end}}
 	{{$ex := or (and (reFind "a_" .Guild.Icon) "gif" ) "png" }}
-		{{$icon := print "https://cdn.discordapp.com/icons/" .Guild.ID "/" .Guild.Icon "." $ex "?size=1024"}}
-		{{sendMessage $chnlID (complexMessage "content" "<:kocka:833322039900241931></návrh_otázky_dne:1064936390367916053>" "embed" (cembed "color" (randInt 16777215) "title" "Otázka dne" "description" $otázka "author" (sdict "name" .Guild.Name "icon_url" $icon) "timestamp" currentTime "footer" (sdict "text" "")) )}}
+	{{$icon := print "https://cdn.discordapp.com/icons/" .Guild.ID "/" .Guild.Icon "." $ex "?size=1024"}}
+	{{sendMessage $chnlID (complexMessage "content" "<:kocka:833322039900241931></návrh_otázky_dne:1064936390367916053>" "embed" (cembed "color" (randInt 16777215) "title" "Otázka dne" "description" $otázka "author" (sdict "name" .Guild.Name "icon_url" $icon) "timestamp" currentTime "footer" (sdict "text" "")) )}}
 {{end}}
