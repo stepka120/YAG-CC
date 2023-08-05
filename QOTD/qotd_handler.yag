@@ -35,10 +35,10 @@
 				{{end}}
 			{{end}}
 			
+			{{$questions := cslice $newQue}}
+
 			{{if not (reFind " --multiline" .Message.Content)}} 
-				{{$questions := split $newQue "\n"}}
-			{{else}}
-				{{$questions := cslice $newQue}}
+				{{$questions = split $newQue "\n"}}
 			{{end}}
 
 			
